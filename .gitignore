@@ -1,0 +1,47 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+tamkin-backend/.env
+.env.prod
+
+# Dependencies
+node_modules/
+tamkin-backend/node_modules/
+tamkin-frontend/node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+tamkin-backend/dist/
+tamkin-frontend/.next/
+tamkin-frontend/out/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+coverage/
+.nyc_output/
+
+# Docker volumes data
+postgres-data/
+postgres-data-prod/
+postgres-data-test/
