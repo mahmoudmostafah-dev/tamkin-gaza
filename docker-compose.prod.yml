@@ -25,8 +25,8 @@ services:
       context: ./tamkin-backend
       dockerfile: Dockerfile
     container_name: tamkin-backend-prod
-    ports:
-      - "${BACKEND_EXTERNAL_PORT}:${BACKEND_PORT}"
+    expose:
+      - "${BACKEND_PORT}"
     environment:
       NODE_ENV: ${NODE_ENV}
       DATABASE_HOST: ${DATABASE_HOST}
@@ -57,8 +57,8 @@ services:
       context: ./tamkin-frontend
       dockerfile: Dockerfile
     container_name: tamkin-frontend-prod
-    ports:
-      - "${FRONTEND_EXTERNAL_PORT}:${FRONTEND_PORT}"
+    expose:
+      - "${FRONTEND_PORT}"
     depends_on:
       tamkin-backend:
         condition: service_healthy
@@ -73,6 +73,35 @@ services:
           "node",
           "-e",
           "require('http').get('http://localhost:${FRONTEND_PORT}', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})",
+        ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  nginx:
+    image: nginx:alpine
+    container_name: tamkin-nginx-prod
+    ports:
+      - "${NGINX_EXTERNAL_PORT}:80"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      tamkin-frontend:
+        condition: service_healthy
+      tamkin-backend:
+        condition: service_healthy
+    networks:
+      - tamkin-network-prod
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost/health",
         ]
       interval: 30s
       timeout: 3s

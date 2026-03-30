@@ -6,6 +6,9 @@
 tamkin/
 ├── .kiro/                    # Kiro AI assistant configuration
 │   └── steering/             # AI guidance documents
+├── nginx/                    # Nginx reverse proxy configuration
+│   ├── nginx.prod.conf       # Production nginx config
+│   └── nginx.test.conf       # Test nginx config
 ├── tamkin-backend/           # NestJS backend service
 ├── tamkin-frontend/          # Next.js frontend service
 ├── .env.prod                 # Production environment variables
@@ -85,7 +88,9 @@ tamkin-frontend/
 ## Docker Architecture
 
 - Multi-service setup with Docker Compose
-- Services: PostgreSQL, Backend, Frontend
+- Services: Nginx (reverse proxy), PostgreSQL, Backend, Frontend
+- Nginx routes traffic: `/` to frontend, `/api` to backend
 - Health checks ensure proper startup order
 - Separate networks for production and test environments
 - Persistent volumes for PostgreSQL data
+- Frontend and backend not directly exposed, only accessible through Nginx

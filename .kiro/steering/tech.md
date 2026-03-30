@@ -59,9 +59,18 @@ npm run lint               # Run ESLint
 
 ## Infrastructure
 
+- **Reverse Proxy**: Nginx (Alpine)
 - **Containerization**: Docker with multi-stage builds
 - **Orchestration**: Docker Compose
 - **Database**: PostgreSQL 16 Alpine
+
+### Nginx Configuration
+
+- Frontend served at root path `/`
+- Backend API proxied at `/api`
+- Health check endpoint at `/health`
+- WebSocket support enabled
+- Proper headers for proxying (X-Real-IP, X-Forwarded-For, etc.)
 
 ### Docker Commands
 
@@ -79,15 +88,15 @@ docker-compose -f docker-compose.test.yml down
 
 **Production:**
 
-- Frontend: http://localhost:4000
-- Backend: http://localhost:4001
+- Nginx (Main Entry): http://localhost:8080
 - PostgreSQL: localhost:5433
 
 **Test:**
 
-- Frontend: http://localhost:3000
-- Backend: http://localhost:3001
+- Nginx (Main Entry): http://localhost:8000
 - PostgreSQL: localhost:5432
+
+Note: Nginx acts as a reverse proxy. Frontend is served at `/` and backend API at `/api`.
 
 ## Code Style
 

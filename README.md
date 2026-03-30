@@ -35,12 +35,12 @@ docker-compose -f docker-compose.test.yml down
 
 ### Production
 
-- Frontend: http://localhost:4000
-- Backend: http://localhost:4001
+- Nginx (Main Entry): http://localhost:8080
 - PostgreSQL: localhost:5433
 
 ### Test
 
-- Frontend: http://localhost:3000
-- Backend: http://localhost:3001
+- Nginx (Main Entry): http://localhost:8000
 - PostgreSQL: localhost:5432
+
+ملحوظة: Nginx بيعمل reverse proxy للـ frontend والـ backend. استخدم `/api` للوصول للـ backend API.
