@@ -9,6 +9,12 @@
 
 ## تشغيل البيئات المختلفة
 
+### Local Development Environment
+
+```bash
+docker-compose up -d
+```
+
 ### Production Environment
 
 ```bash
@@ -24,6 +30,9 @@ docker-compose --env-file .env.test -f docker-compose.test.yml up -d
 ### إيقاف الخدمات
 
 ```bash
+# Local
+docker-compose down
+
 # Production
 docker-compose -f docker-compose.prod.yml down
 
@@ -32,6 +41,11 @@ docker-compose -f docker-compose.test.yml down
 ```
 
 ## المنافذ (Ports)
+
+### Local
+
+- Nginx (Main Entry): http://localhost:3080
+- PostgreSQL: localhost:5434
 
 ### Production
 
