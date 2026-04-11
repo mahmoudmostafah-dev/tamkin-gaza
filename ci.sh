@@ -30,3 +30,5 @@ echo "🔗 Creating Pull Request to $BASE_BRANCH..."
 gh pr create --base "$BASE_BRANCH" --head "$NEW_BRANCH" --title "$COMMIT_MSG"
 
 echo "✅ DONE - PR created successfully"
+
+gh pr create --base dev --head local-save --title "PR for setup i18n and shadcn"
