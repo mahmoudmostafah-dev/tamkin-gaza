@@ -26,9 +26,21 @@ fi
 
 git commit -m "$COMMIT_MSG"
 
+echo "⬆️ Pushing branch..."
+git push origin "$NEW_BRANCH"
+
 echo "🔗 Creating Pull Request to $BASE_BRANCH..."
-gh pr create --base "$BASE_BRANCH" --head "$NEW_BRANCH" --title "$COMMIT_MSG"
+gh pr create --base --head "$NEW_BRANCH" --title "$COMMIT_MSG"
 
 echo "✅ DONE - PR created successfully"
 
-gh pr create --base dev --head local-save --title "PR for setup i18n and shadcn"
+gh pr create \
+  --base  "$BASE_BRANCH"\
+  --head "$NEW_BRANCH"\
+  --repo mahmoudmostafah-dev/tamkin-gaza
+
+
+gh pr create \
+  --base  dev \
+  --head local-save \
+  --repo mahmoudmostafah-dev/tamkin-gaza
