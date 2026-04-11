@@ -26,9 +26,6 @@ fi
 
 git commit -m "$COMMIT_MSG"
 
-echo "⬆️ Pushing branch..."
-git push origin "$NEW_BRANCH"
-
 echo "🔗 Creating Pull Request to $BASE_BRANCH..."
 gh pr create --base "$BASE_BRANCH" --head "$NEW_BRANCH" --title "$COMMIT_MSG"
 
