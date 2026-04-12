@@ -3,14 +3,17 @@ import Backend from 'i18next-fs-backend';
 import middleware from 'i18next-http-middleware';
 import { join } from 'path';
 
+const languages =['en', 'ar', 'tr', 'ur']
+
 export const i18nInit = async () => {
   await i18next
     .use(Backend)
     .use(middleware.LanguageDetector)
     .init({
       fallbackLng: 'en',
-      supportedLngs: ['en', 'ar', 'tr', 'ur'],
-      preload: ['en', 'ar', 'tr', 'ur'],
+      supportedLngs: languages,
+      preload: languages,
+
       ns: ['auth', 'token'],
       defaultNS: 'common',
       backend: {
