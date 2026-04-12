@@ -35,7 +35,8 @@ export class AuthenticationGuard implements CanActivate {
 
     if (!authorization || authorization === "") {
       throw this.errorResponse.forbidden({
-        message: "You are not authorized to access this resource",
+        message: req.t('token:errors.you_are_not_authorized_to_access_this_resource'),
+        info:req.t('token:errors.authorization_header_missing')
       })
     }
 
@@ -44,9 +45,6 @@ export class AuthenticationGuard implements CanActivate {
 
     req.user = user;
     req.decoded = decoded;
-
-
-    console.log({user,decoded})
 
     return true;
   }

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable, Scope } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import jwt, { sign } from "jsonwebtoken";
 import { Repository } from "typeorm";
@@ -11,10 +11,11 @@ import { I_Session } from "./client-info.service";
 import { compareHash, generateHash } from "./hash";
 import { ErrorResponse } from "../Response/error.response";
 import { E_SignatureLevel } from "src/Common/Enums/signature.level.enum";
+import type { Request } from "express";
 
 
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class TokenService {
   constructor(
     private readonly errorResponse:ErrorResponse ,
@@ -22,7 +23,8 @@ export class TokenService {
     private readonly jwtRepository: Repository<JwtModel>,
     @InjectRepository(UserModel)
     private readonly userRepository: Repository<UserModel>,
-
+    @Inject("REQUEST")
+    private readonly request: Request,
   ) { }
 
   private getSecretKey(
@@ -62,12 +64,9 @@ export class TokenService {
         break;
     }
 
-
-  
-
     if (!key) {
       throw this.errorResponse.serverError({
-        message: "Secret key is missing in .env",
+        message: this.request.t('token:errors.secret_key_missing') ,
       })
     }
 
@@ -183,7 +182,15 @@ export class TokenService {
     token: string,
     secretKey: string,
   ): Promise<I_Decoded> => {
-    return jwt.verify(token, secretKey) as I_Decoded;
+
+    try {
+      return jwt.verify(token, secretKey) as I_Decoded;
+    } catch (error) {
+      throw this.errorResponse.unauthorized({
+        message: this.request.t('auth:errors.token_validation_failed') ,
+        info: error.message,
+      });
+    }
   };
 
   private async revokeAllTokensForUser(filter: { userId: string }) {
@@ -208,10 +215,29 @@ export class TokenService {
     try {
       decoded = await this.verifyToken(token.split(" ")[1], SECRET_KEY);
     } catch (error) {
+
+      const message = this.request.t('token:errors.token_validation_failed') ;
+
+      if (error.name === 'TokenExpiredError') {
+        throw this.errorResponse.unauthorized({
+          message: message ,
+          info: this.request.t('token:errors.token_expired'),
+        });
+      }
+
+      if (error.name === 'JsonWebTokenError') {
+        throw this.errorResponse.unauthorized({
+          message: message ,
+          info: this.request.t('auth:errors.token_validation_failed'),
+        });
+      }
+
       throw this.errorResponse.unauthorized({
-        message: 'Token validation failed',
+        message: message,
         info: error.message,
       });
+
+
     }
 
     let user: any = null;
@@ -233,49 +259,51 @@ export class TokenService {
 
     if (!user) {
       throw this.errorResponse.unauthorized({
-        message: 'User or Gate account not found',
-        info: 'The associated account could not be located',
+        message: this.request.t('token:errors.user_account_not_found') ,
+        info: this.request.t('token:errors.the_associated_account_could_not_be_located'),
       });
     }
 
     if (adminSetting?.changeCredentialsTime && adminSetting.changeCredentialsTime > new Date(decoded.iat * 1000)) {
       throw this.errorResponse.unauthorized({
-        message: 'Token invalidated by recent credential change',
-        info: 'Your password or account settings have been updated; please log in again',
+        message: this.request.t('token:errors.token_invalidated_by_recent_credential_change') ,
+        info: this.request.t('token:errors.your_password_or_account_settings_have_been_updated_please_log_in_again'),
       });
     }
 
     if (!jwt) {
       throw this.errorResponse.unauthorized({
-        message: 'Invalid or revoked session',
-        info: 'Your session credentials are no longer valid. Please log in again',
+        message: this.request.t('token:errors.invalid_or_revoked_session') ,
+        info: this.request.t('token:errors.your_session_credentials_are_no_longer_valid_please_log_in_again'),
       });
     }
 
     if (jwt.type !== type) {
       throw this.errorResponse.unauthorized({
-        message: 'Invalid token type',
-        info: 'The provided token does not match the required token type',
+        message: this.request.t('token:errors.invalid_token_type') ,
+        info: this.request.t('token:errors.the_provided_token_does_not_match_the_required_token_type'),
       });
     }
 
     if (jwt.revoked) {
       throw this.errorResponse.unauthorized({
-        message: 'Session expired, please log in again',
+        message: this.request.t('token:errors.session_expired_please_log_in_again') ,
+        info: this.request.t('token:errors.your_session_credentials_are_no_longer_valid_please_log_in_again'),
       });
     }
 
     if (jwt.expiresAt < new Date()) {
+
       if (jwt.type === E_TokenType.REFRESH) {
         throw this.errorResponse.unauthorized({
-          message: 'Refresh token has expired',
-          info: 'Your session has timed out. Please log in again',
+          message: this.request.t('token:errors.refresh_token_has_expired') ,
+          info: this.request.t('token:errors.your_session_has_timed_out_please_log_in_again'),
         });
       }
 
       throw this.errorResponse.unauthorized({
-        message: 'Access token has expired',
-        info: 'Your access token has timed out. Please refresh your session',
+        message: this.request.t('token:errors.access_token_has_expired') ,
+        info: this.request.t('token:errors.your_access_token_has_timed_out_please_refresh_your_session'),
       });
     }
 
@@ -294,7 +322,8 @@ export class TokenService {
       })
  */
       throw this.errorResponse.unauthorized({
-        message: 'Session expired, please log in again',
+        message: this.request.t('token:errors.session_expired_please_log_in_again') ,
+        info: this.request.t('token:errors.your_session_credentials_are_no_longer_valid_please_log_in_again'),
       });
     }
 

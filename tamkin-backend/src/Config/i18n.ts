@@ -11,10 +11,10 @@ export const i18nInit = async () => {
       fallbackLng: 'en',
       supportedLngs: ['en', 'ar', 'tr', 'ur'],
       preload: ['en', 'ar', 'tr', 'ur'],
-      ns: ['auth'],
+      ns: ['auth', 'token'],
       defaultNS: 'common',
       backend: {
-        loadPath: join(__dirname, '../../Locales/{{lng}}/{{ns}}.json'),
+        loadPath: join(__dirname, '../Locales/{{lng}}/{{ns}}.json'),
       },
       detection: {
         order: ['header'],
