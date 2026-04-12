@@ -10,6 +10,7 @@ import { E_UserRole } from "src/Common/Enums/user.enums";
 import { I_Session } from "./client-info.service";
 import { compareHash, generateHash } from "./hash";
 import { ErrorResponse } from "../Response/error.response";
+import { E_SignatureLevel } from "src/Common/Enums/signature.level.enum";
 
 
 
@@ -24,25 +25,50 @@ export class TokenService {
 
   ) { }
 
-
-
   private getSecretKey(
     tokenType: E_TokenType,
-    role: E_UserRole | string,
+    signature: E_SignatureLevel,
   ): string {
+
 
     let key: string | undefined;
 
-    const rolePrefix = role === E_UserRole.USER ? 'USER_' : 'ADMIN_';
+    switch(tokenType){
+      case E_TokenType.ACCESS:
+        switch(signature){
+          case E_SignatureLevel.SUPER_ADMIN:
+            key = process.env.SUPER_ADMIN_ACCESS_TOKEN_SECRET;
+            break;
+          case E_SignatureLevel.ADMIN:
+            key = process.env.ADMIN_ACCESS_TOKEN_SECRET;
+            break;
+          case E_SignatureLevel.USER:
+            key = process.env.USER_ACCESS_TOKEN_SECRET;
+            break;
+        }
+        break;
+      case E_TokenType.REFRESH:
+        switch(signature){
+          case E_SignatureLevel.SUPER_ADMIN:
+            key = process.env.SUPER_ADMIN_REFRESH_TOKEN_SECRET;
+            break;
+          case E_SignatureLevel.ADMIN:
+            key = process.env.ADMIN_REFRESH_TOKEN_SECRET;
+            break;
+          case E_SignatureLevel.USER:
+            key = process.env.USER_REFRESH_TOKEN_SECRET;
+            break;
+        }
+        break;
+    }
 
-    const typeSuffix = tokenType === E_TokenType.ACCESS ? 'ACCESS_TOKEN_SIGNATURE' : 'REFRESH_TOKEN_SIGNATURE';
 
-    const keyName = `${rolePrefix}${typeSuffix}`;
-
-    key = process.env[keyName];
+  
 
     if (!key) {
-      throw new Error(`Secret key ${keyName} is missing in .env`);
+      throw this.errorResponse.serverError({
+        message: "Secret key is missing in .env",
+      })
     }
 
     return key;
@@ -50,7 +76,8 @@ export class TokenService {
 
   private async signToken(data: I_SignToken) {
 
-    let SECRET_KEY: string = this.getSecretKey(data.tokenType, data.payload.role);
+
+    let SECRET_KEY: string = this.getSecretKey(data.tokenType, data.payload.signature);
 
     const ACCESS_TOKEN_EXPIRES = process.env.NODE_ENV === "Development" ? process.env.ACCESS_TOKEN_EXPIRES_DEV_MOOD ?? "24h" : process.env.ACCESS_TOKEN_EXPIRES ?? "1h";
 
@@ -74,13 +101,32 @@ export class TokenService {
 
   async createLoginCredentials(
     userId: string,
-    role: E_UserRole | string,
+    role: E_UserRole ,
   ) {
+
+    let signature: E_SignatureLevel = E_SignatureLevel.USER;
+
+    
+    switch (role) {
+      case E_UserRole.SUPER_ADMIN:
+        signature = E_SignatureLevel.SUPER_ADMIN;
+        break;
+
+        case E_UserRole.ADMIN:
+          signature = E_SignatureLevel.ADMIN;
+          break;
+    
+      default:
+        signature = E_SignatureLevel.USER;
+        break;
+    }
+
 
     const access_token = await this.signToken({
       payload: {
         userId,
         role,
+        signature
       },
       tokenType: E_TokenType.ACCESS,
     });
@@ -89,18 +135,19 @@ export class TokenService {
       payload: {
         userId,
         role,
+        signature
       },
       tokenType: E_TokenType.REFRESH,
     });
 
     return {
       access_token: {
-        token: access_token.token,
+        token: `${signature} ${access_token.token}`,
         jti: access_token.jti,
       },
 
       refresh_token: {
-        token: refresh_token.token,
+        token: `${signature} ${refresh_token.token}`,
         jti: refresh_token.jti,
       },
     };
@@ -154,22 +201,12 @@ export class TokenService {
     
   ) {
 
-    const signature = token.split(" ")[1] ;
-    let role: E_UserRole | string;
-    if(signature === "System"){
-      role = E_UserRole.ADMIN
-    }else if(signature === "Admin"){
-      role = E_UserRole.ADMIN
-    }else{
-      role = E_UserRole.USER
-    }
-
-
-    const SECRET_KEY = this.getSecretKey(type, role);
+    
+    const SECRET_KEY = this.getSecretKey(type, token.split(" ")[0] as E_SignatureLevel);
     let decoded: I_Decoded;
 
     try {
-      decoded = await this.verifyToken(token, SECRET_KEY);
+      decoded = await this.verifyToken(token.split(" ")[1], SECRET_KEY);
     } catch (error) {
       throw this.errorResponse.unauthorized({
         message: 'Token validation failed',
