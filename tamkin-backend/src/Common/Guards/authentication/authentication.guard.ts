@@ -40,7 +40,6 @@ export class AuthenticationGuard implements CanActivate {
       })
     }
 
-
     const {user,decoded} = await this.tokenService.decodeToken(authorization,E_TokenType.ACCESS);
 
     req.user = user;

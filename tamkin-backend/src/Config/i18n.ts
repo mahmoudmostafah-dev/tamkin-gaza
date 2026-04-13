@@ -4,15 +4,18 @@ import middleware from 'i18next-http-middleware';
 import { join } from 'path';
 import { SUPPORTED_LANGUAGES } from './supported-languages.config';
 
+const languages =['en', 'ar', 'tr', 'ur']
+
 export const i18nInit = async () => {
   await i18next
     .use(Backend)
     .use(middleware.LanguageDetector)
     .init({
       fallbackLng: 'en',
-      supportedLngs: SUPPORTED_LANGUAGES,
-      preload: SUPPORTED_LANGUAGES,
-      ns: ['auth', 'token'],
+      supportedLngs: languages,
+      preload: languages,
+
+      ns: ['auth', 'token', 'main'],
       defaultNS: 'common',
       backend: {
         loadPath: join(__dirname, '../Locales/{{lng}}/{{ns}}.json'),
