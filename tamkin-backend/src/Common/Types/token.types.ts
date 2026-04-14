@@ -5,9 +5,9 @@ import { E_UserRole } from "../Enums/user.enums";
 
 export interface I_SignToken {
   payload: {
-    userId:  string;
+    userId: string;
     role: E_UserRole | string;
-    signature: E_SignatureLevel ;
+    signature: E_SignatureLevel;
   };
   tokenType: E_TokenType;
 }

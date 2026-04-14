@@ -3,7 +3,7 @@ import Backend from 'i18next-fs-backend';
 import middleware from 'i18next-http-middleware';
 import { join } from 'path';
 
-const languages =['en', 'ar', 'tr', 'ur']
+const languages = ['en', 'ar', 'tr', 'ur']
 
 export const i18nInit = async () => {
   await i18next
@@ -14,7 +14,7 @@ export const i18nInit = async () => {
       supportedLngs: languages,
       preload: languages,
 
-      ns: ['auth', 'token', 'main'],
+      ns: ['auth', 'token', 'main', "email"],
       defaultNS: 'common',
       backend: {
         loadPath: join(__dirname, '../Locales/{{lng}}/{{ns}}.json'),

@@ -187,7 +187,7 @@ export class TokenService {
       return jwt.verify(token, secretKey) as I_Decoded;
     } catch (error: any) {
       throw this.errorResponse.unauthorized({
-        message: this.request.t('auth:errors.token_validation_failed'),
+        message: this.request.t('token:errors.token_validation_failed'),
         info: error.message,
       });
     }

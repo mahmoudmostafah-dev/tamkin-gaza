@@ -1,5 +1,6 @@
 import { I_User } from "../Interfaces/user.interface";
 import { I_Decoded } from "./token.types";
+import { Request } from 'express';
 
 export interface I_Request extends Request {
     user?: I_User;

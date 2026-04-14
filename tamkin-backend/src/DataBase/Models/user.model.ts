@@ -1,6 +1,6 @@
 import { E_UserProvider, E_UserRole } from 'src/Common/Enums/user.enums';
 import { I_User } from 'src/Common/Interfaces/user.interface';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Generated } from 'typeorm';
 import { Expose } from 'class-transformer';
 
 
@@ -9,7 +9,8 @@ export class UserModel implements I_User {
     @PrimaryGeneratedColumn()
     _id: number;
 
-    @PrimaryGeneratedColumn("uuid")
+    @Column({ unique: true })
+    @Generated('uuid')
     uuid: string;
 
     @Column({ nullable: false })

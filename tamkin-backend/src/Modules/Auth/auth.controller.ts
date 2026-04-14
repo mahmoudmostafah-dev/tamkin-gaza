@@ -1,9 +1,11 @@
-import { Body, Controller, Post, Req, Res, UsePipes } from '@nestjs/common';
+import { Body, Controller, Post, Req, Res, UseGuards, UsePipes } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { GoogleLoginDto, LoginDto, RegisterDto } from './Dto/register.dto';
+import { ConfirmEmailDto, GoogleLoginDto, LoginDto, RegisterDto } from './Dto/register.dto';
 import { ValidationPipe } from '@nestjs/common';
 import { SuccessResponse } from 'src/Common/Utils/Response/success.response';
 import type { Request, Response } from 'express';
+import type { I_Request } from 'src/Common/Types/request.types';
+import { AuthenticationGuard } from 'src/Common/Guards/Authentication/authentication.guard';
 
 @UsePipes(new ValidationPipe({
   forbidNonWhitelisted: true,
@@ -22,8 +24,8 @@ export class AuthController {
     @Body() body: GoogleLoginDto) {
     const { user, status } = await this.authService.loginWithGoogle(req, res, body);
     return SuccessResponse({
-      message: status === "register" ? req.t('auth:messages.registeredSuccessfully') : req.t('auth:messages.loggedSuccessfully'),
-      info: req.t('auth:messages.credentialsSavedInCookiesSuccessfully'),
+      message: status === "register" ? req.t('auth:success.registeredSuccessfully') : req.t('auth:success.loggedSuccessfully'),
+      info: req.t('auth:success.credentialsSavedInCookiesSuccessfully'),
       data: {
         user,
         status
@@ -39,8 +41,8 @@ export class AuthController {
     const { user } = await this.authService.register(req, res, body);
 
     return SuccessResponse({
-      message: req.t('auth:messages.registeredSuccessfully'),
-      info: req.t('auth:messages.credentialsSavedInCookiesSuccessfully'),
+      message: req.t('auth:success.registeredSuccessfully'),
+      info: req.t('auth:success.credentialsSavedInCookiesSuccessfully'),
       data: {
         user,
       }
@@ -55,8 +57,8 @@ export class AuthController {
     const { user } = await this.authService.login(req, res, body);
 
     return SuccessResponse({
-      message: req.t('auth:messages.loggedSuccessfully'),
-      info: req.t('auth:messages.credentialsSavedInCookiesSuccessfully'),
+      message: req.t('auth:success.loggedSuccessfully'),
+      info: req.t('auth:success.credentialsSavedInCookiesSuccessfully'),
       data: {
         user,
       }
@@ -71,7 +73,38 @@ export class AuthController {
 
     return SuccessResponse({
       message: req.t('auth:success.loggedOutSuccessfully'),
+      info: req.t('auth:success.credentialsDeletedFromCookiesSuccessfully'),
     });
   }
+
+  @UseGuards(AuthenticationGuard)
+  @Post('request-confirm-email')
+  async requestConfirmEmail(
+    @Req() req: I_Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    await this.authService.requestConfirmEmail(req, res);
+
+    return SuccessResponse({
+      message: req.t('auth:success.requestConfirmEmail'),
+      info: req.t('auth:success.otpSentToYourEmailPleaseCheckYourEmailAndConfirmYourEmail')
+    });
+  }
+
+  @UseGuards(AuthenticationGuard)
+  @Post('confirm-email')
+  async confirmEmail(
+    @Req() req: I_Request,
+    @Body() body: ConfirmEmailDto,
+  ) {
+    await this.authService.confirmEmail(req, body);
+
+    return SuccessResponse({
+      message: req.t('auth:success.emailVerifiedSuccessfully'),
+      info: req.t('auth:success.emailVerifiedSuccessfullyInfo'),
+    });
+  }
+
+
 
 }

@@ -1,5 +1,5 @@
 import { E_TokenType } from "src/Common/Enums/token.enum";
-import {  I_Jwt } from "src/Common/Interfaces/jwt.interface";
+import { I_Jwt } from "src/Common/Interfaces/jwt.interface";
 import type { I_DeviceInfo } from "src/Common/Interfaces/jwt.interface";
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
@@ -23,13 +23,13 @@ export class JwtModel implements I_Jwt {
     @Column()
     expiresAt: Date;
 
-    @Column({default: false})
+    @Column({ default: false })
     revoked: boolean;
 
-    @Column({nullable: true})
+    @Column({ nullable: true })
     revokedAt?: Date;
 
-    @Column({type: "jsonb"})
+    @Column({ type: "jsonb" })
     deviceInfo: I_DeviceInfo;
 
     @Column()

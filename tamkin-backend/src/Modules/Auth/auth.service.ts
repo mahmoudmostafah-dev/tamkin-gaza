@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { GoogleLoginDto, LoginDto, RegisterDto } from './Dto/register.dto';
+import { GoogleLoginDto, LoginDto, RegisterDto, ConfirmEmailDto } from './Dto/register.dto';
 import { ErrorResponse } from 'src/Common/Utils/Response/error.response';
 import { GoogleAuth } from './Google-Auth/google.auth';
 import { UserModel } from 'src/DataBase/Models/user.model';
@@ -13,6 +13,9 @@ import { CookiesService } from 'src/Common/Cookies/cookies.service';
 import { E_UserProvider } from 'src/Common/Enums/user.enums';
 import countries from "i18n-iso-countries";
 import { compareHash, generateHash } from 'src/Common/Utils/Security/hash';
+import { I_Request } from 'src/Common/Types/request.types';
+import { OTPService } from 'src/Common/Utils/Otp/otp.service';
+import { E_OTPType } from 'src/Common/Enums/otp.enum';
 
 @Injectable()
 export class AuthService {
@@ -26,6 +29,7 @@ export class AuthService {
         private readonly tokenService: TokenService,
         private readonly clientInfoService: ClientInfoService,
         private readonly cookiesService: CookiesService,
+        private readonly otpService: OTPService,
     ) { }
 
     async loginWithGoogle(req: Request, res: Response, body: GoogleLoginDto) {
@@ -223,6 +227,7 @@ export class AuthService {
         }
 
     }
+
     async logout(req: Request, res: Response) {
         const access_token = req.cookies['access_token'];
         const refresh_token = req.cookies['refresh_token'];
@@ -231,6 +236,59 @@ export class AuthService {
 
         this.cookiesService.removeTokenFromCookies(res, E_TokenType.ACCESS);
         this.cookiesService.removeTokenFromCookies(res, E_TokenType.REFRESH);
+    }
+
+    async requestConfirmEmail(req: I_Request, res: Response) {
+
+        if (req.user?.emailVerified) {
+            throw this.errorResponse.badRequest({
+                message: req.t('auth:errors.emailAlreadyVerified'),
+                info: req.t('auth:errors.emailAlreadyVerifiedInfo')
+            });
+        }
+
+        const result = await this.otpService.sendOTP({
+            userId: req.user!._id,
+            email: req.user!.email,
+            userName: req.user!.firstName,
+            type: E_OTPType.CONFIRM_EMAIL,
+            t: req.t
+        });
+
+        if (!result) {
+            throw this.errorResponse.badRequest({
+                message: req.t('auth:errors.failToSendOTP'),
+                info: req.t('auth:errors.failToSendOTPInfo')
+            });
+        }
+
+    }
+
+    async confirmEmail(req: I_Request, body: ConfirmEmailDto) {
+
+        if (req.user?.emailVerified) {
+            throw this.errorResponse.badRequest({
+                message: req.t('auth:errors.emailAlreadyVerified'),
+                info: req.t('auth:errors.emailAlreadyVerifiedInfo')
+            });
+        }
+
+        const result = await this.otpService.verifyOTP({
+            userId: req.user!._id,
+            code: body.code,
+            type: E_OTPType.CONFIRM_EMAIL,
+            t: req.t
+        });
+
+        if (!result) {
+            throw this.errorResponse.badRequest({
+                message: req.t('auth:errors.otpInvalid'),
+                info: req.t('auth:errors.otpInvalidInfo')
+            });
+        }
+
+        await this.userModel.update(req.user!._id, { emailVerified: true });
+
     }
 
 }
