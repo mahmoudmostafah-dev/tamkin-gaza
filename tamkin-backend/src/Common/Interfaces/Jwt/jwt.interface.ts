@@ -1,55 +1,36 @@
-import { E_TokenType } from "../Enums/token.enum";
+import { BrowserEnum, DeviceTypeEnum, OSEnum } from 'src/Common/Enums/Jwt/jwt.enum';
+import { TokenTypeEnum } from 'src/Common/Enums/token.enum';
 
-export enum E_DeviceType {
-    DESKTOP = "Desktop",
-    MOBILE = "Mobile",
-    TABLET = "Tablet"
+export interface IDeviceInfo {
+  type: DeviceTypeEnum;
+  os: OSEnum;
+  browser: BrowserEnum;
 }
 
-export enum E_OS {
-    LINUX = "Linux",
-    WINDOWS = "Windows",
-    MAC_OS = "Mac Os",
-    ANDROID = "Android",
-    IOS = "Ios"
-}
+export interface IJwt {
+  _id: string;
 
-export enum E_Browser {
-    CHROME = "Chrome",
-    FIREFOX = "Firefox",
-    SAFARI = "Safari",
-    EDGE = "Edge"
-}
+  userId?: string;
 
-export interface I_DeviceInfo {
-    type: E_DeviceType;
-    os: E_OS;
-    browser: E_Browser;
-}
+  jti: string;
 
-export interface I_Jwt {
-    _id: string;
+  token: string;
 
-    userId?: string;
+  type: TokenTypeEnum;
 
-    jti: string;
+  expiresAt: Date;
 
-    token: string;
+  revoked: boolean;
 
-    type: E_TokenType;
+  revokedAt?: Date;
 
-    expiresAt: Date;
+  deviceInfo: IDeviceInfo;
 
-    revoked: boolean;
+  ipAddress: string;
 
-    revokedAt?: Date;
+  userAgent: string;
 
-    deviceInfo: I_DeviceInfo;
+  createdAt: Date;
 
-    ipAddress: string;
-
-    userAgent: string;
-
-    createdAt: Date;
-    updatedAt: Date;
+  updatedAt: Date;
 }

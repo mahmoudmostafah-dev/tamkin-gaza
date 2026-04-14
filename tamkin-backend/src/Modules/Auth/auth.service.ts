@@ -1,29 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { GoogleLoginDto, LoginDto, RegisterDto } from './Dto/register.dto';
-import { ErrorResponse } from 'src/Common/Utils/Response/error.response';
+import { ResponseService } from 'src/Common/Services/Response/response.service';
 import { GoogleAuth } from './Google-Auth/google.auth';
 import { UserModel } from 'src/DataBase/Models/user.model';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TokenService } from 'src/Common/Utils/Security/token.service';
-import { ClientInfoService } from 'src/Common/Utils/Security/client-info.service';
 import { Request, Response } from 'express';
-import { E_TokenType } from 'src/Common/Enums/token.enum';
-import { CookiesService } from 'src/Common/Cookies/cookies.service';
-import { E_UserProvider } from 'src/Common/Enums/user.enums';
+import { TokenTypeEnum } from 'src/Common/Enums/token.enum';
+import { CookiesService } from 'src/Common/Services/Cookies/cookies.service';
+import { UserProviderEnum } from 'src/Common/Enums/User/user.enum';
 import countries from 'i18n-iso-countries';
-import { compareHash, generateHash } from 'src/Common/Utils/Security/hash';
+import { TokenService } from 'src/Common/Services/Security/token.service';
+import { ClientInfoService } from 'src/Common/Services/Security/client-info.service';
+import { HashingService } from 'src/Common/Services/Security/Hash/hash.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly errorResponse: ErrorResponse,
+    private readonly responseService: ResponseService,
     private readonly googleAuth: GoogleAuth,
     @InjectRepository(UserModel)
     private readonly userModel: Repository<UserModel>,
     private readonly tokenService: TokenService,
     private readonly clientInfoService: ClientInfoService,
     private readonly cookiesService: CookiesService,
+    private readonly hashingService: HashingService,
   ) {}
 
   async loginWithGoogle(req: Request, res: Response, body: GoogleLoginDto) {
@@ -44,11 +45,11 @@ export class AuthService {
         firstName: given_name,
         lastName: family_name,
         picture,
-        provider: E_UserProvider.GOOGLE,
+        provider: UserProviderEnum.GOOGLE,
       });
 
       if (!newUser) {
-        throw this.errorResponse.serverError({
+        throw this.responseService.serverError({
           message: req.t('auth:errors.failToCreateUser'),
           info: req.t('auth:errors.somethingWentWrongPleaseTryAgain'),
         });
@@ -69,7 +70,7 @@ export class AuthService {
         user.uuid,
         tokens.access_token.jti,
         tokens.access_token.token,
-        E_TokenType.ACCESS,
+        TokenTypeEnum.ACCESS,
         session,
       ),
 
@@ -77,7 +78,7 @@ export class AuthService {
         user.uuid,
         tokens.refresh_token.jti,
         tokens.refresh_token.token,
-        E_TokenType.REFRESH,
+        TokenTypeEnum.REFRESH,
         session,
       ),
     ]);
@@ -85,12 +86,12 @@ export class AuthService {
     this.cookiesService.setTokenToCookies(
       res,
       tokens.access_token.token,
-      E_TokenType.ACCESS,
+      TokenTypeEnum.ACCESS,
     );
     this.cookiesService.setTokenToCookies(
       res,
       tokens.refresh_token.token,
-      E_TokenType.REFRESH,
+      TokenTypeEnum.REFRESH,
     );
 
     return {
@@ -105,30 +106,30 @@ export class AuthService {
     });
 
     if (user) {
-      throw this.errorResponse.badRequest({
+      throw this.responseService.badRequest({
         message: req.t('auth:errors.emailAlreadyExists'),
         info: req.t('auth:errors.thisAccountIsAlreadyRegisteredPleaseLogin'),
       });
     }
 
     if (body.password !== body.confirmPassword) {
-      throw this.errorResponse.badRequest({
+      throw this.responseService.badRequest({
         message: req.t('auth:errors.passwordsNotMatch'),
       });
     }
 
     const newUser: UserModel = await this.userModel.save({
       email: body.email,
-      password: await generateHash({ text: body.password }),
+      password: await this.hashingService.hashPassword(body.password),
       firstName: body.fullName.split(' ')[0],
       lastName: body.fullName.split(' ')[1],
       nationality: countries.getName(body.nationality, 'en'),
-      provider: E_UserProvider.SYSTEM,
+      provider: UserProviderEnum.SYSTEM,
       test: 'sss',
     });
 
     if (!newUser) {
-      throw this.errorResponse.serverError({
+      throw this.responseService.serverError({
         message: req.t('auth:errors.failToCreateUser'),
         info: req.t('auth:errors.somethingWentWrongPleaseTryAgain'),
       });
@@ -146,7 +147,7 @@ export class AuthService {
         newUser.uuid,
         tokens.access_token.jti,
         tokens.access_token.token,
-        E_TokenType.ACCESS,
+        TokenTypeEnum.ACCESS,
         session,
       ),
 
@@ -154,7 +155,7 @@ export class AuthService {
         newUser.uuid,
         tokens.refresh_token.jti,
         tokens.refresh_token.token,
-        E_TokenType.REFRESH,
+        TokenTypeEnum.REFRESH,
         session,
       ),
     ]);
@@ -162,12 +163,12 @@ export class AuthService {
     this.cookiesService.setTokenToCookies(
       res,
       tokens.access_token.token,
-      E_TokenType.ACCESS,
+      TokenTypeEnum.ACCESS,
     );
     this.cookiesService.setTokenToCookies(
       res,
       tokens.refresh_token.token,
-      E_TokenType.REFRESH,
+      TokenTypeEnum.REFRESH,
     );
 
     return {
@@ -181,19 +182,14 @@ export class AuthService {
     });
 
     if (!user || !user.password) {
-      throw this.errorResponse.badRequest({
+      throw this.responseService.badRequest({
         message: req.t('auth:errors.invalidCredentials'),
         info: req.t('auth:errors.invalidCredentialsInfo'),
       });
     }
 
-    if (
-      !(await compareHash({
-        plainText: body.password,
-        hashText: user.password,
-      }))
-    ) {
-      throw this.errorResponse.badRequest({
+    if (!(await this.hashingService.compare(body.password, user.password))) {
+      throw this.responseService.badRequest({
         message: req.t('auth:errors.invalidCredentials'),
         info: req.t('auth:errors.invalidCredentialsInfo'),
       });
@@ -211,7 +207,7 @@ export class AuthService {
         user.uuid,
         tokens.access_token.jti,
         tokens.access_token.token,
-        E_TokenType.ACCESS,
+        TokenTypeEnum.ACCESS,
         session,
       ),
 
@@ -219,7 +215,7 @@ export class AuthService {
         user.uuid,
         tokens.refresh_token.jti,
         tokens.refresh_token.token,
-        E_TokenType.REFRESH,
+        TokenTypeEnum.REFRESH,
         session,
       ),
     ]);
@@ -227,12 +223,12 @@ export class AuthService {
     this.cookiesService.setTokenToCookies(
       res,
       tokens.access_token.token,
-      E_TokenType.ACCESS,
+      TokenTypeEnum.ACCESS,
     );
     this.cookiesService.setTokenToCookies(
       res,
       tokens.refresh_token.token,
-      E_TokenType.REFRESH,
+      TokenTypeEnum.REFRESH,
     );
 
     return {
@@ -245,7 +241,7 @@ export class AuthService {
 
     await this.tokenService.revokeSessionTokens(access_token, refresh_token);
 
-    this.cookiesService.removeTokenFromCookies(res, E_TokenType.ACCESS);
-    this.cookiesService.removeTokenFromCookies(res, E_TokenType.REFRESH);
+    this.cookiesService.removeTokenFromCookies(res, TokenTypeEnum.ACCESS);
+    this.cookiesService.removeTokenFromCookies(res, TokenTypeEnum.REFRESH);
   }
 }

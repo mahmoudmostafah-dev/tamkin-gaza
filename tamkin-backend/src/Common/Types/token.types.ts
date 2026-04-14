@@ -1,20 +1,19 @@
-import { E_SignatureLevel } from "../Enums/signature.level.enum";
-import { E_TokenType } from "../Enums/token.enum";
-import { E_UserRole } from "../Enums/user.enums";
+import { SignatureLevelEnum } from '../Enums/User/signature.level.enum';
+import { TokenTypeEnum } from '../Enums/token.enum';
+import { UserRoleEnum } from '../Enums/User/user.enum';
 
-
-export interface I_SignToken {
+export interface ISignToken {
   payload: {
-    userId:  string;
-    role: E_UserRole | string;
-    signature: E_SignatureLevel ;
+    userId: string;
+    role: UserRoleEnum | string;
+    signature: SignatureLevelEnum;
   };
-  tokenType: E_TokenType;
+  tokenType: TokenTypeEnum;
 }
 
-export interface I_Decoded {
+export interface IDecoded {
   userId: string;
-  role: E_UserRole | string;
+  role: UserRoleEnum | string;
   iat: number;
   exp: number;
   jti: string;

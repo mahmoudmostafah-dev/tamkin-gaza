@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ValidationPipe } from '@nestjs/common';
-import { ErrorResponse } from '../Utils/Response/error.response';
+import { ResponseService } from '../Services/Response/response.service';
 
 @Injectable()
 export class CustomValidationPipe extends ValidationPipe {
-  constructor(private readonly errorResponse: ErrorResponse) {
+  constructor(private readonly responseService: ResponseService) {
     super({
       whitelist: true,
       forbidNonWhitelisted: true,
@@ -16,7 +16,7 @@ export class CustomValidationPipe extends ValidationPipe {
           errors: Object.values(error.constraints || {}),
         }));
 
-        return errorResponse.badRequest({
+        return responseService.badRequest({
           message: 'Validation failed',
           info: 'One or more fields contain invalid data',
           issues: formattedErrors,

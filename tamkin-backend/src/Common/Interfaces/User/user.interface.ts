@@ -1,6 +1,3 @@
-import { E_UserProvider, E_UserRole } from "../Enums/user.enums";
-
-
 /* export interface I_UserActions {
     freezedAt?: Date;
     freezedBy?: string;
@@ -21,29 +18,34 @@ import { E_UserProvider, E_UserRole } from "../Enums/user.enums";
     unBannedBy?: string;
 } */
 
-export interface I_User {
-    _id: number;
-    uuid: string;
+import {
+  UserProviderEnum,
+  UserRoleEnum,
+} from 'src/Common/Enums/User/user.enum';
 
-    firstName: string;
-    lastName: string;
-    
-    fullName: string;
+export interface IUser {
+  _id: number;
+  uuid: string;
 
-    email: string;
+  firstName: string;
+  lastName: string;
 
-    emailVerified: boolean;
+  fullName: string;
 
-    provider: E_UserProvider;
+  email: string;
 
-    password?: string;
+  emailVerified: boolean;
 
-    nationality?: string;
+  provider: UserProviderEnum;
 
-    picture?: string;
+  password?: string;
 
-    role: E_UserRole;
+  nationality?: string;
 
-    createdAt: Date;
-    updatedAt: Date;
+  picture?: string;
+
+  role: UserRoleEnum;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
