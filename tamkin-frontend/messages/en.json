@@ -1,0 +1,61 @@
+{
+    "homePage":{
+        "title":"Hello"
+    },
+    "navbar":{
+        "campaigns":"Campaigns",
+        "blogs":"Blogs",
+        "stories":"Stories",
+        "contact":"Contact",
+        "more":"More",
+        "privacy":"Privacy",
+        "terms":"Terms",
+        "about":"About",
+        "login":"Login",
+        "register":"Register"
+    },
+    "errors": {
+    "forbidden": {
+      "title": "Access Denied",
+      "description": "You don't have permission to access this page.",
+      "home": "Go Home",
+      "contact": "Contact Support"
+    },
+    "notFound": {
+      "title": "Page Not Found",
+      "description": "The page you are looking for does not exist.",
+      "home": "Go Home",
+      "back": "Go Back"
+    }
+  },
+  "about": {
+    "title": "About Us",
+    "p1": "We build modern web applications.",
+    "p2": "Our goal is to deliver scalable systems.",
+    "p3": "We focus on performance and UX."
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "intro": "We respect your privacy.",
+    "dataCollection": "We only collect necessary data.",
+    "cookies": "We use cookies for analytics.",
+    "security": "Your data is protected."
+  },
+  "terms": {
+    "title": "Terms of Use",
+    "acceptance": "By using our site you agree to terms.",
+    "usage": "Do not misuse the platform.",
+    "liability": "We are not responsible for damages.",
+    "changes": "Terms may change anytime."
+  },
+  "footer": {
+    "description": "Modern SaaS platform built with Next.js",
+    "company": "Company",
+    "legal": "Legal",
+    "about": "About",
+    "contact": "Contact",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "rights": "All rights reserved"
+  }
+}
