@@ -6,9 +6,12 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UnauthorizedException,
+  unauthorizedException,
 } from '@nestjs/common';
-import { ExceptionOptions, IResponse } from '../../Interfaces/Response/response.interface';
+import {
+  ExceptionOptions,
+  IResponse,
+} from '../../Interfaces/Response/response.interface';
 
 @Injectable()
 export class ResponseService {
@@ -77,10 +80,10 @@ export class ResponseService {
   }
 
   unauthorized(options: ExceptionOptions = {}) {
-    throw new UnauthorizedException(
+    throw new unauthorizedException(
       this.createErrorPayload(
-        'UnauthorizedException',
-        HttpStatus.UNAUTHORIZED,
+        'unauthorizedException',
+        HttpStatus.unauthorized,
         options,
       ),
     );

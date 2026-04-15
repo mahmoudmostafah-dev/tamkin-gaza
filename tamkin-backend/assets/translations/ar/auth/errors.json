@@ -1,13 +1,13 @@
 {
-  "failToVerifyThisAccount": "فشل التحقق من هذا الحساب",
-  "failToVerifyThisToken": "فشل التحقق من هذا التوكن",
-  "tokenUsedTooLate": "تم استخدام التوكن بعد فوات الأوان",
-  "emailAlreadyExists": "البريد الإلكتروني موجود بالفعل",
-  "thisAccountIsAlreadyRegisteredPleaseLogin": "هذا الحساب مسجل بالفعل، يرجى تسجيل الدخول",
-  "failToCreateUser": "فشل إنشاء المستخدم",
-  "somethingWentWrongPleaseTryAgain": "حدث خطأ ما، يرجى المحاولة مرة أخرى",
-  "invalidCredentials": "فشل تسجيل الدخول",
-  "invalidCredentialsInfo": "البريد الإلكتروني أو كلمة المرور غير صحيحة. يرجى التحقق من بيانات الاعتماد والمحاولة مرة أخرى.",
-  "unAuthorized": "غير مصرح لك بالوصول إلى هذا المورد",
-  "unAuthorizedInfo": "ليس لديك صلاحية الوصول إلى هذا المورد. يرجى الاتصال بالمسؤول للحصول على المساعدة."
+  "fail_to_verify_this_account": "فشل التحقق من هذا الحساب",
+  "fail_to_Verify_this_token": "فشل التحقق من هذا التوكن",
+  "token_used_too_late": "تم استخدام التوكن بعد فوات الأوان",
+  "email_already_exists": "البريد الإلكتروني موجود بالفعل",
+  "this_accountIs_already_registered_please_login": "هذا الحساب مسجل بالفعل، يرجى تسجيل الدخول",
+  "fail_to_create_user": "فشل إنشاء المستخدم",
+  "something_went_wrong_please_try_again": "حدث خطأ ما، يرجى المحاولة مرة أخرى",
+  "invalid_credentials": "فشل تسجيل الدخول",
+  "invalid_credentials_info": "البريد الإلكتروني أو كلمة المرور غير صحيحة. يرجى التحقق من بيانات الاعتماد والمحاولة مرة أخرى.",
+  "unauthorized": "غير مصرح لك بالوصول إلى هذا المورد",
+  "unauthorized_info": "ليس لديك صلاحية الوصول إلى هذا المورد. يرجى الاتصال بالمسؤول للحصول على المساعدة."
 }

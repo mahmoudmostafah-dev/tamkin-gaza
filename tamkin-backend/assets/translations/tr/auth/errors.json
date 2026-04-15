@@ -1,13 +1,13 @@
 {
-  "failToVerifyThisAccount": "Bu hesap doğrulanamadı",
-  "failToVerifyThisToken": "Bu token doğrulanamadı",
-  "tokenUsedTooLate": "Token çok geç kullanıldı",
-  "emailAlreadyExists": "E-posta zaten mevcut",
-  "thisAccountIsAlreadyRegisteredPleaseLogin": "Bu hesap zaten kayıtlı, lütfen giriş yapın",
-  "failToCreateUser": "Kullanıcı oluşturulamadı",
-  "somethingWentWrongPleaseTryAgain": "Bir şeyler yanlış gitti, lütfen tekrar deneyin",
-  "invalidCredentials": "Giriş başarısız",
-  "invalidCredentialsInfo": "Geçersiz e-posta veya şifre girildi. Lütfen kimlik bilgilerinizi kontrol edip tekrar deneyin.",
-  "unAuthorized": "Bu kaynağa erişim yetkiniz yok",
-  "unAuthorizedInfo": "Bu kaynağa erişim izniniz yok. Lütfen yardım için yöneticiyle iletişime geçin."
+  "fail_to_verify_this_account": "Bu hesap doğrulanamadı",
+  "fail_to_Verify_this_token": "Bu token doğrulanamadı",
+  "token_used_too_late": "Token çok geç kullanıldı",
+  "email_already_exists": "E-posta zaten mevcut",
+  "this_accountIs_already_registered_please_login": "Bu hesap zaten kayıtlı, lütfen giriş yapın",
+  "fail_to_create_user": "Kullanıcı oluşturulamadı",
+  "something_went_wrong_please_try_again": "Bir şeyler yanlış gitti, lütfen tekrar deneyin",
+  "invalid_credentials": "Giriş başarısız",
+  "invalid_credentials_info": "Geçersiz e-posta veya şifre girildi. Lütfen kimlik bilgilerinizi kontrol edip tekrar deneyin.",
+  "unauthorized": "Bu kaynağa erişim yetkiniz yok",
+  "unauthorized_info": "Bu kaynağa erişim izniniz yok. Lütfen yardım için yöneticiyle iletişime geçin."
 }

@@ -30,11 +30,11 @@ export class GoogleAuthService {
         const userLang = (req as ILanguageRequest).userLanguage;
         throw this.responseService.badRequest({
           message: this.translationService.translate(
-            'auth:errors.failToVerifyThisToken',
+            'auth:errors.fail_to_Verify_this_token',
             userLang,
           ),
           info: this.translationService.translate(
-            'auth:errors.failToVerifyThisAccount',
+            'auth:errors.fail_to_verify_this_account',
             userLang,
           ),
         });
@@ -46,7 +46,7 @@ export class GoogleAuthService {
       if (error.message.startsWith('Invalid argument: id_token')) {
         throw this.responseService.badRequest({
           message: this.translationService.translate(
-            'auth:errors.failToVerifyThisToken',
+            'auth:errors.fail_to_Verify_this_token',
             userLang,
           ),
           info: 'Invalid argument: id_token',
@@ -54,18 +54,18 @@ export class GoogleAuthService {
       } else if (error.message.startsWith('Token used too late')) {
         throw this.responseService.badRequest({
           message: this.translationService.translate(
-            'auth:errors.failToVerifyThisToken',
+            'auth:errors.fail_to_Verify_this_token',
             userLang,
           ),
           info: this.translationService.translate(
-            'auth:errors.tokenUsedTooLate',
+            'auth:errors.token_used_too_late',
             userLang,
           ),
         });
       } else {
         throw this.responseService.badRequest({
           message: this.translationService.translate(
-            'auth:errors.failToVerifyThisToken',
+            'auth:errors.fail_to_Verify_this_token',
             userLang,
           ),
         });

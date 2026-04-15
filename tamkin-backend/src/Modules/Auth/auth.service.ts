@@ -55,11 +55,11 @@ export class AuthService {
         const userLang = (req as ILanguageRequest).userLanguage;
         throw this.responseService.serverError({
           message: this.translationService.translate(
-            'auth:errors.failToCreateUser',
+            'auth:errors.fail_to_create_user',
             userLang,
           ),
           info: this.translationService.translate(
-            'auth:errors.somethingWentWrongPleaseTryAgain',
+            'auth:errors.something_went_wrong_please_try_again',
             userLang,
           ),
         });
@@ -119,11 +119,11 @@ export class AuthService {
       const userLang = (req as ILanguageRequest).userLanguage;
       throw this.responseService.badRequest({
         message: this.translationService.translate(
-          'auth:errors.emailAlreadyExists',
+          'auth:errors.email_already_exists',
           userLang,
         ),
         info: this.translationService.translate(
-          'auth:errors.thisAccountIsAlreadyRegisteredPleaseLogin',
+          'auth:errors.this_accountIs_already_registered_please_login',
           userLang,
         ),
       });
@@ -153,11 +153,11 @@ export class AuthService {
       const userLang = (req as ILanguageRequest).userLanguage;
       throw this.responseService.serverError({
         message: this.translationService.translate(
-          'auth:errors.failToCreateUser',
+          'auth:errors.fail_to_create_user',
           userLang,
         ),
         info: this.translationService.translate(
-          'auth:errors.somethingWentWrongPleaseTryAgain',
+          'auth:errors.something_went_wrong_please_try_again',
           userLang,
         ),
       });
@@ -213,11 +213,11 @@ export class AuthService {
       const userLang = (req as ILanguageRequest).userLanguage;
       throw this.responseService.badRequest({
         message: this.translationService.translate(
-          'auth:errors.invalidCredentials',
+          'auth:errors.invalid_credentials',
           userLang,
         ),
         info: this.translationService.translate(
-          'auth:errors.invalidCredentialsInfo',
+          'auth:errors.invalid_credentials_info',
           userLang,
         ),
       });
@@ -227,11 +227,11 @@ export class AuthService {
       const userLang = (req as ILanguageRequest).userLanguage;
       throw this.responseService.badRequest({
         message: this.translationService.translate(
-          'auth:errors.invalidCredentials',
+          'auth:errors.invalid_credentials',
           userLang,
         ),
         info: this.translationService.translate(
-          'auth:errors.invalidCredentialsInfo',
+          'auth:errors.invalid_credentials_info',
           userLang,
         ),
       });

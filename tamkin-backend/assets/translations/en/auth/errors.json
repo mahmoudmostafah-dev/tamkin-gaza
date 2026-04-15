@@ -1,13 +1,13 @@
 {
-  "failToVerifyThisAccount": "Failed to verify this account",
-  "failToVerifyThisToken": "Failed to verify this token",
-  "tokenUsedTooLate": "Token used too late",
-  "emailAlreadyExists": "Email already exists",
-  "thisAccountIsAlreadyRegisteredPleaseLogin": "This account is already registered, please login",
-  "failToCreateUser": "Failed to create user",
-  "somethingWentWrongPleaseTryAgain": "Something went wrong, please try again",
-  "invalidCredentials": "Login failed",
-  "invalidCredentialsInfo": "Invalid email or password provided. Please check your credentials and try again.",
-  "unAuthorized": "You are not authorized to access this resource",
-  "unAuthorizedInfo": "You do not have permission to access this resource. Please contact the admin for assistance."
+  "fail_to_verify_this_account": "Failed to verify this account",
+  "fail_to_Verify_this_token": "Failed to verify this token",
+  "token_used_too_late": "Token used too late",
+  "email_already_exists": "Email already exists",
+  "this_accountIs_already_registered_please_login": "This account is already registered, please login",
+  "fail_to_create_user": "Failed to create user",
+  "something_went_wrong_please_try_again": "Something went wrong, please try again",
+  "invalid_credentials": "Login failed",
+  "invalid_credentials_info": "Invalid email or password provided. Please check your credentials and try again.",
+  "unauthorized": "You are not authorized to access this resource",
+  "unauthorized_info": "You do not have permission to access this resource. Please contact the admin for assistance."
 }

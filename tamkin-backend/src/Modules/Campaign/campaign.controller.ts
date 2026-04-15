@@ -1,8 +1,17 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { CreateCampaignDto } from './Dtos/create-campaign.dto';
 import { CampaignService } from './campaign.service';
 import { ResponseService } from 'src/Common/Services/Response/response.service';
 import { TranslationService } from 'src/Common/Services/Translation/translation.service';
+import type { ILanguageRequest } from 'src/Common/Interfaces/Language/language-request.interface';
 
 @Controller('campaign')
 export class CampaignController {
@@ -12,12 +21,20 @@ export class CampaignController {
     private readonly translationService: TranslationService,
   ) {}
   @Post()
-  async createCampaign(@Body() createCampaignDto: CreateCampaignDto) {
-    const campaign = await this.campaignService.create(createCampaignDto);
+  async createCampaign(
+    @Req() request: ILanguageRequest,
+    @Body() createCampaignDto: CreateCampaignDto,
+  ) {
+    const userLanguage = request.userLanguage;
+    const campaign = await this.campaignService.create(
+      createCampaignDto,
+      userLanguage,
+    );
     return this.responseService.success({
       statusCode: HttpStatus.CREATED,
-      message: await this.translationService.translate('ar',
-        'campaign:success.campaignCreatedSuccessfully',
+      message: await this.translationService.translate(
+        userLanguage,
+        'campaign:success.campaign_created_successfully',
       ),
       data: campaign,
     });

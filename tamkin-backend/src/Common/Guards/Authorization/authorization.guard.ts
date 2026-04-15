@@ -41,11 +41,11 @@ export class AuthorizationGuard implements CanActivate {
       const userLang = (req as ILanguageRequest).userLanguage;
       throw this.responseService.unauthorized({
         message: this.translationService.translate(
-          'auth:errors.unAuthorized',
+          'auth:errors.unauthorized',
           userLang,
         ),
         info: this.translationService.translate(
-          'auth:errors.unAuthorizedInfo',
+          'auth:errors.unauthorized_info',
           userLang,
         ),
       });
