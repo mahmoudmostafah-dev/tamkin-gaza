@@ -1,4 +1,4 @@
-export enum E_OTPType {
+export enum OTPTypeEnum {
     CONFIRM_EMAIL = "Confirm Email",
     ENABLE_2FA = "Enable 2FA",
     DISABLE_2FA = "Disable 2FA",
@@ -8,9 +8,9 @@ export enum E_OTPType {
 }
 
 
-export enum E_OTPStatus{
-    ACTIVE="active",
-    USED="used",
-    EXPIRED="expired",
-    BLOCKED="blocked"
+export enum E_OTPStatus {
+    ACTIVE = "active",
+    USED = "used",
+    EXPIRED = "expired",
+    BLOCKED = "blocked"
 }

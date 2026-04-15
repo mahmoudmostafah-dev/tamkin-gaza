@@ -3,24 +3,20 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OtpModel } from 'src/DataBase/Models/otp.model';
-import { E_OTPStatus, E_OTPType } from 'src/Common/Enums/otp.enum';
-import { ErrorResponse } from '../Response/error.response';
+import { E_OTPStatus, OTPTypeEnum } from 'src/Common/Enums/otp.enum';
 import { EmailService } from '../Email/email.service';
-import { compareHash, generateHash } from '../Security/hash';
+import { ResponseService } from 'src/Common/Services/Response/response.service';
+import { HashingService } from 'src/Common/Services/Security/Hash/hash.service';
 
 type TFunction = (key: string) => string;
-
-const OTP_EXPIRES_MS = 10 * 60 * 1000;        // 10 minutes
-const OTP_DELETE_AFTER_MS = 24 * 60 * 60 * 1000;   // 24 hours
-const MAX_RESENDS = 3;
-const RESEND_BLOCK_MS = 60 * 60 * 1000;         // 1 hour
 
 @Injectable()
 export class OTPService {
 
   constructor(
-    private readonly error: ErrorResponse,
+    private readonly responseService: ResponseService,
     private readonly emailService: EmailService,
+    private readonly hashingService: HashingService,
     @InjectRepository(OtpModel)
     private readonly otpRepository: Repository<OtpModel>,
   ) { }
@@ -36,7 +32,7 @@ export class OTPService {
     type,
   }: {
     userId: number;
-    type: E_OTPType;
+    type: OTPTypeEnum;
   }) {
 
     const otp = await this.otpRepository.findOne({
@@ -59,7 +55,7 @@ export class OTPService {
     userId: number;
     email: string;
     userName: string;
-    type: E_OTPType;
+    type: OTPTypeEnum;
     t: TFunction;
   }) {
 
@@ -70,7 +66,7 @@ export class OTPService {
 
       // 1. لو لسه blocked
       if (requestExists.blockedUntil && requestExists.blockedUntil.getTime() > Date.now()) {
-        throw this.error.badRequest({
+        throw this.responseService.badRequest({
           message: t('auth:errors.confirmEmailOTPBlocked'),
           info: t('auth:errors.confirmEmailOTPBlockedInfo'),
         });
@@ -78,7 +74,7 @@ export class OTPService {
 
       // 2. limit
       if (requestExists.resendCount >= 3) {
-        throw this.error.badRequest({
+        throw this.responseService.badRequest({
           message: t('auth:errors.otpTooManyRequests'),
           info: t('auth:errors.otpTooManyRequestsInfo'),
         });
@@ -87,10 +83,10 @@ export class OTPService {
       // 3. update نفس الـ OTP
       const otpCode = this.generateCode();
 
-      requestExists.code = await generateHash({ text: otpCode });
-      requestExists.expiresAt = new Date(Date.now() + OTP_EXPIRES_MS);
+      requestExists.code = await this.hashingService.generateHash({text: otpCode});
+      requestExists.expiresAt = new Date(Date.now() + 15 * 60 * 1000);
       requestExists.resendCount += 1;
-      requestExists.blockedUntil = new Date(Date.now() + RESEND_BLOCK_MS);
+      requestExists.blockedUntil = new Date(Date.now() + 1 * 60 * 1000);
 
       await this.otpRepository.save(requestExists);
 
@@ -110,7 +106,7 @@ export class OTPService {
 
     const newOtp = this.otpRepository.create({
       userId,
-      code: await generateHash({ text: otpCode }),
+      code: await this.hashingService.generateHash({text: otpCode}),
       type,
       expiresAt: new Date(Date.now() + 15 * 60 * 1000),
       status: E_OTPStatus.ACTIVE,
@@ -133,7 +129,7 @@ export class OTPService {
 
       await this.otpRepository.delete(newOtp);
 
-      throw this.error.serverError({
+      throw this.responseService.serverError({
         message: t('email:errors.failToSendEmail'),
         info: t('email:errors.failToSendEmailInfo'),
       })
@@ -152,23 +148,23 @@ export class OTPService {
   }: {
     userId: number;
     code: string;
-    type: E_OTPType;
+    type: OTPTypeEnum;
     t: TFunction;
   }) {
 
     const otp = await this.checkRequestExists({ userId, type });
 
     if (!otp) {
-      throw this.error.badRequest({
+      throw this.responseService.badRequest({
         message: t('auth:errors.otpInvalid'),
         info: t('auth:errors.otpInvalidInfo')
       });
     }
 
-    const isCodeValid = await compareHash({ plainText: code, hashText: otp.code });
+    const isCodeValid = await this.hashingService.compareHash({hashText: otp.code, plainText: code});
 
     if (!isCodeValid) {
-      throw this.error.badRequest({
+      throw this.responseService.badRequest({
         message: t('auth:errors.otpInvalid'),
         info: t('auth:errors.otpInvalidInfo')
       });

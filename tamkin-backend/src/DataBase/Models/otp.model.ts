@@ -1,6 +1,6 @@
 import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
 import { I_OTP } from "src/Common/Interfaces/otp.interface";
-import { E_OTPStatus, E_OTPType } from "src/Common/Enums/otp.enum";
+import { E_OTPStatus, OTPTypeEnum } from "src/Common/Enums/otp.enum";
 
 
 @Entity()
@@ -15,8 +15,8 @@ export class OtpModel implements I_OTP {
     @Column()
     code: string;
 
-    @Column({ enum: E_OTPType })
-    type: E_OTPType;
+    @Column({ enum: OTPTypeEnum })
+    type: OTPTypeEnum;
 
     @Column({ enum: E_OTPStatus, default: E_OTPStatus.ACTIVE })
     status: E_OTPStatus;

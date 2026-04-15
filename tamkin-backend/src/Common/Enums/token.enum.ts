@@ -1,6 +1,4 @@
-
-
-export enum E_TokenType {
+export enum TokenTypeEnum {
   ACCESS = 'Access',
   REFRESH = 'Refresh',
 }

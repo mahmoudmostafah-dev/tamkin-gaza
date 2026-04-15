@@ -1,4 +1,4 @@
-import { E_OTPStatus, E_OTPType } from "../Enums/otp.enum";
+import { E_OTPStatus, OTPTypeEnum } from "../Enums/otp.enum";
 
 export interface I_OTP {
 
@@ -6,7 +6,7 @@ export interface I_OTP {
 
     code: string; // 6 characters hashed
 
-    type: E_OTPType;
+    type: OTPTypeEnum;
 
     status: E_OTPStatus;
 

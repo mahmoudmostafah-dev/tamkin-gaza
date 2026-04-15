@@ -2,20 +2,24 @@ import { Body, Controller, Post, Req, Res, UseGuards, UsePipes } from '@nestjs/c
 import { AuthService } from './auth.service';
 import { ConfirmEmailDto, GoogleLoginDto, LoginDto, RegisterDto } from './Dto/register.dto';
 import { ValidationPipe } from '@nestjs/common';
-import { SuccessResponse } from 'src/Common/Utils/Response/success.response';
 import type { Request, Response } from 'express';
 import type { I_Request } from 'src/Common/Types/request.types';
-import { AuthenticationGuard } from 'src/Common/Guards/Authentication/authentication.guard';
+import { ResponseService } from 'src/Common/Services/Response/response.service';
+import { AuthenticationGuard } from 'src/Common/Guards/authentication/authentication.guard';
 
-@UsePipes(new ValidationPipe({
-  forbidNonWhitelisted: true,
-  whitelist: true,
-  transform: true,
-}))
-
+@UsePipes(
+  new ValidationPipe({
+    forbidNonWhitelisted: true,
+    whitelist: true,
+    transform: true,
+  }),
+)
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(
+    private readonly authService: AuthService,
+    private readonly responseService: ResponseService,
+  ) {}
 
   @Post('google')
   async loginWithGoogle(
@@ -23,13 +27,13 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
     @Body() body: GoogleLoginDto) {
     const { user, status } = await this.authService.loginWithGoogle(req, res, body);
-    return SuccessResponse({
+    return this.responseService.success({
       message: status === "register" ? req.t('auth:success.registeredSuccessfully') : req.t('auth:success.loggedSuccessfully'),
       info: req.t('auth:success.credentialsSavedInCookiesSuccessfully'),
       data: {
         user,
-        status
-      }
+        status,
+      },
     });
   }
 
@@ -37,15 +41,16 @@ export class AuthController {
   async register(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-    @Body() body: RegisterDto) {
+    @Body() body: RegisterDto,
+  ) {
     const { user } = await this.authService.register(req, res, body);
 
-    return SuccessResponse({
+    return this.responseService.success({
       message: req.t('auth:success.registeredSuccessfully'),
       info: req.t('auth:success.credentialsSavedInCookiesSuccessfully'),
       data: {
         user,
-      }
+      },
     });
   }
 
@@ -53,25 +58,24 @@ export class AuthController {
   async login(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-    @Body() body: LoginDto) {
+    @Body() body: LoginDto,
+  ) {
     const { user } = await this.authService.login(req, res, body);
 
-    return SuccessResponse({
+    return this.responseService.success({
       message: req.t('auth:success.loggedSuccessfully'),
       info: req.t('auth:success.credentialsSavedInCookiesSuccessfully'),
       data: {
         user,
-      }
+      },
     });
   }
 
   @Post('logout')
-  async logout(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response) {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     await this.authService.logout(req, res);
 
-    return SuccessResponse({
+    return this.responseService.success({
       message: req.t('auth:success.loggedOutSuccessfully'),
       info: req.t('auth:success.credentialsDeletedFromCookiesSuccessfully'),
     });
@@ -85,7 +89,7 @@ export class AuthController {
   ) {
     await this.authService.requestConfirmEmail(req, res);
 
-    return SuccessResponse({
+    return this.responseService.success({
       message: req.t('auth:success.requestConfirmEmail'),
       info: req.t('auth:success.otpSentToYourEmailPleaseCheckYourEmailAndConfirmYourEmail')
     });
@@ -99,7 +103,7 @@ export class AuthController {
   ) {
     await this.authService.confirmEmail(req, body);
 
-    return SuccessResponse({
+    return this.responseService.success({
       message: req.t('auth:success.emailVerifiedSuccessfully'),
       info: req.t('auth:success.emailVerifiedSuccessfullyInfo'),
     });

@@ -1,23 +1,25 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
-import { E_UserRole } from 'src/Common/Enums/user.enums';
-import { ErrorResponse } from 'src/Common/Utils/Response/error.response';
+import { UserRoleEnum } from 'src/Common/Enums/User/user.enum';
+import { ResponseService } from 'src/Common/Services/Response/response.service';
 
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
-
-  constructor(private readonly reflector: Reflector, private readonly errorResponse: ErrorResponse) { }
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly responseService: ResponseService,
+  ) {}
 
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const accessRoles: E_UserRole[] =
+    const accessRoles: UserRoleEnum[] =
       this.reflector.getAllAndOverride('accessRoles', [context.getHandler()]) ||
       [];
 
     let req: any;
-    let role: E_UserRole = E_UserRole.USER;
+    let role: UserRoleEnum = UserRoleEnum.USER;
 
     switch (context.getType()) {
       case 'http':
@@ -33,13 +35,12 @@ export class AuthorizationGuard implements CanActivate {
     }
 
     if (!accessRoles.includes(role)) {
-      throw this.errorResponse.unauthorized({
+      throw this.responseService.unauthorized({
         message: req.t('auth:errors.unAuthorized'),
-        info: req.t('auth:errors.unAuthorizedInfo')
+        info: req.t('auth:errors.unAuthorizedInfo'),
       });
     }
 
     return true;
-
   }
 }

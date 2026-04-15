@@ -1,8 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { getTransporter } from './Config/email.config';
 import { E_EmailSubject } from './email.subjects';
-import { E_OTPType } from 'src/Common/Enums/otp.enum';
-import { ErrorResponse } from 'src/Common/Utils/Response/error.response';
+import { OTPTypeEnum } from 'src/Common/Enums/otp.enum';
 import {
   confirmEmailTemplate,
   disableTwoFATemplate,
@@ -11,13 +10,14 @@ import {
   resetPasswordOtpTemplate,
   updateEmailOtpTemplate,
 } from './email.templates';
+import { ResponseService } from 'src/Common/Services/Response/response.service';
 
 type TFunction = (key: string) => string;
 
 @Injectable()
 export class EmailService {
 
-  constructor(private readonly error: ErrorResponse) { }
+  constructor(private readonly error: ResponseService) { }
 
   private async sendEmail({
     to,
@@ -68,31 +68,31 @@ export class EmailService {
     email: string;
     userName: string;
     OTP: string;
-    type: E_OTPType;
+    type: OTPTypeEnum;
     t: TFunction;
   }) {
-    const templates: Record<E_OTPType, { subject: string; html: string }> = {
-      [E_OTPType.CONFIRM_EMAIL]: {
+    const templates: Record<OTPTypeEnum, { subject: string; html: string }> = {
+      [OTPTypeEnum.CONFIRM_EMAIL]: {
         subject: E_EmailSubject.CONFIRM_EMAIL,
         html: confirmEmailTemplate({ userName, OTP }),
       },
-      [E_OTPType.RESET_PASSWORD]: {
+      [OTPTypeEnum.RESET_PASSWORD]: {
         subject: E_EmailSubject.RESET_PASSWORD,
         html: resetPasswordOtpTemplate({ userName, OTP }),
       },
-      [E_OTPType.LOGIN_OTP]: {
+      [OTPTypeEnum.LOGIN_OTP]: {
         subject: E_EmailSubject.LOGIN_OTP,
         html: loginOtpTemplate({ userName, OTP }),
       },
-      [E_OTPType.ENABLE_2FA]: {
+      [OTPTypeEnum.ENABLE_2FA]: {
         subject: E_EmailSubject.ENABLE_2FA,
         html: enableTwoFATemplate({ userName, OTP }),
       },
-      [E_OTPType.DISABLE_2FA]: {
+      [OTPTypeEnum.DISABLE_2FA]: {
         subject: E_EmailSubject.DISABLE_2FA,
         html: disableTwoFATemplate({ userName, OTP }),
       },
-      [E_OTPType.UPDATE_EMAIL]: {
+      [OTPTypeEnum.UPDATE_EMAIL]: {
         subject: E_EmailSubject.UPDATE_EMAIL,
         html: updateEmailOtpTemplate({ userName, OTP }),
       },
