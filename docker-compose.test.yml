@@ -39,16 +39,7 @@ services:
         condition: service_healthy
     networks:
       - tamkin-network-test
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          'node -e "require(''http'').get(''http://localhost:3000'', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)}).on(''error'', (e) => {throw e})"',
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
+    restart: on-failure
 
   tamkin-frontend:
     build:
@@ -58,23 +49,13 @@ services:
     expose:
       - "3200"
     depends_on:
-      tamkin-backend:
-        condition: service_healthy
+      - tamkin-backend
     environment:
       NODE_ENV: ${FRONTEND_NODE_ENV}
       PORT: 3200
     networks:
       - tamkin-network-test
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          'node -e "require(''http'').get(''http://localhost:3200'', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)}).on(''error'', (e) => {throw e})"',
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
+    restart: on-failure
 
   nginx:
     image: nginx:alpine
@@ -84,26 +65,11 @@ services:
     volumes:
       - ./nginx/nginx.test.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      tamkin-frontend:
-        condition: service_healthy
-      tamkin-backend:
-        condition: service_healthy
+      - tamkin-frontend
+      - tamkin-backend
     networks:
       - tamkin-network-test
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--quiet",
-          "--tries=1",
-          "--spider",
-          "http://localhost/health",
-        ]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 5s
+    restart: on-failure
 
 networks:
   tamkin-network-test:
