@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "campaignAlreadyExist" : "إسم هذه الحملة موجود بالفعل",
+    "validation": {
+      "titleFormatError": "يجب أن يحتوي العنوان على ترجمات للغات التالية: {langs}"
+    }
+  },
+  "success": {
+    "campaignCreatedSuccessfully": "تم إنشاء الحملة بنجاح"
+  }
+}

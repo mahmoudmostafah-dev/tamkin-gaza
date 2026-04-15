@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "campaignAlreadyExist": "اس مہم کا نام پہلے سے موجود ہے",
+    "validation": {
+      "titleFormatError": "عنوان میں درج ذیل زبانوں کے ترجمے ہونے چاہئیں: {langs}"
+    }
+  },
+  "success": {
+    "campaignCreatedSuccessfully": "مہم کامیابی کے ساتھ بن گئی"
+  }
+}
