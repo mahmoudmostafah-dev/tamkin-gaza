@@ -67,15 +67,17 @@ docker run --rm \
 echo -e "${YELLOW}📋 Copying certificates...${NC}"
 
 # Production
-cp "$CERTBOT_DIR/conf/live/tamkeengaza.org/fullchain.pem" "$SSL_DIR/tamkeengaza.org.crt"
-cp "$CERTBOT_DIR/conf/live/tamkeengaza.org/privkey.pem" "$SSL_DIR/tamkeengaza.org.key"
+sudo cp "$CERTBOT_DIR/conf/live/tamkeengaza.org/fullchain.pem" "$SSL_DIR/tamkeengaza.org.crt"
+sudo cp "$CERTBOT_DIR/conf/live/tamkeengaza.org/privkey.pem" "$SSL_DIR/tamkeengaza.org.key"
 
 # Test
-cp "$CERTBOT_DIR/conf/live/test.tamkeengaza.org/fullchain.pem" "$SSL_DIR/test.tamkeengaza.org.crt"
-cp "$CERTBOT_DIR/conf/live/test.tamkeengaza.org/privkey.pem" "$SSL_DIR/test.tamkeengaza.org.key"
+sudo cp "$CERTBOT_DIR/conf/live/test.tamkeengaza.org/fullchain.pem" "$SSL_DIR/test.tamkeengaza.org.crt"
+sudo cp "$CERTBOT_DIR/conf/live/test.tamkeengaza.org/privkey.pem" "$SSL_DIR/test.tamkeengaza.org.key"
 
 # 6. Set permissions
 echo -e "${YELLOW}🔐 Setting permissions...${NC}"
+sudo chown -R $USER:$USER "$SSL_DIR"
+sudo chown -R $USER:$USER "$CERTBOT_DIR"
 chmod 600 "$SSL_DIR"/*.key
 chmod 644 "$SSL_DIR"/*.crt
 
