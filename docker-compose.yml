@@ -1,115 +1,198 @@
 services:
-  postgres:
+  # ============================================
+  # PostgreSQL - Test
+  # ============================================
+  postgres-test:
     image: postgres:16-alpine
-    container_name: tamkin-postgres-prod
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "${POSTGRES_EXTERNAL_PORT}:${POSTGRES_PORT}"
+      POSTGRES_USER: ${POSTGRES_TEST_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_TEST_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_TEST_DB}
     volumes:
-      - postgres-data-prod:/var/lib/postgresql/data
+      - postgres-data-test:/var/lib/postgresql/data
     networks:
-      - tamkin-network
+      - tamkin-test-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_TEST_USER} -d ${POSTGRES_TEST_DB}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: "0.5"
 
-  tamkin-backend:
+  # ============================================
+  # Backend - Test
+  # ============================================
+  backend-test:
     build:
       context: ./tamkin-backend
       dockerfile: Dockerfile
-    container_name: tamkin-backend-prod
-    expose:
-      - "${BACKEND_PORT}"
     environment:
-      NODE_ENV: ${NODE_ENV}
-      DATABASE_HOST: ${DATABASE_HOST}
-      DATABASE_PORT: ${POSTGRES_PORT}
-      DATABASE_USER: ${POSTGRES_USER}
-      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
-      DATABASE_NAME: ${POSTGRES_DB}
+      NODE_ENV: ${TEST_ENV}
+      DATABASE_HOST: postgres-test
+      DATABASE_PORT: 5432
+      DATABASE_USER: ${POSTGRES_TEST_USER}
+      DATABASE_PASSWORD: ${POSTGRES_TEST_PASSWORD}
+      DATABASE_NAME: ${POSTGRES_TEST_DB}
     depends_on:
-      postgres:
+      postgres-test:
         condition: service_healthy
     networks:
-      - tamkin-network
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "require('http').get('http://localhost:${BACKEND_PORT}', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})",
-        ]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 5s
+      - tamkin-test-network
+      - tamkin-nginx-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: "0.5"
 
-  tamkin-frontend:
+  # ============================================
+  # Frontend - Test
+  # ============================================
+  frontend-test:
     build:
       context: ./tamkin-frontend
       dockerfile: Dockerfile
-    container_name: tamkin-frontend-prod
-    expose:
-      - "3200"
-    depends_on:
-      tamkin-backend:
-        condition: service_healthy
     environment:
-      NODE_ENV: ${FRONTEND_NODE_ENV}
-      PORT: 3200
+      NODE_ENV: ${TEST_ENV}
+      PORT: ${FRONTEND_PORT}
+    depends_on:
+      - backend-test
     networks:
-      - tamkin-network
+      - tamkin-test-network
+      - tamkin-nginx-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: "0.5"
+
+  # ============================================
+  # PostgreSQL - Production
+  # ============================================
+  postgres-prod:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_PROD_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PROD_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_PROD_DB}
+    volumes:
+      - postgres-data-prod:/var/lib/postgresql/data
+    networks:
+      - tamkin-prod-network
     healthcheck:
       test:
         [
-          "CMD",
-          "node",
-          "-e",
-          "require('http').get('http://localhost:3200', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})",
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_PROD_USER} -d ${POSTGRES_PROD_DB}",
         ]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 5s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+          cpus: "1.0"
 
+  # ============================================
+  # Backend - Production
+  # ============================================
+  backend-prod:
+    build:
+      context: ./tamkin-backend
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: ${PROD_ENV}
+      DATABASE_HOST: postgres-prod
+      DATABASE_PORT: 5432
+      DATABASE_USER: ${POSTGRES_PROD_USER}
+      DATABASE_PASSWORD: ${POSTGRES_PROD_PASSWORD}
+      DATABASE_NAME: ${POSTGRES_PROD_DB}
+    depends_on:
+      postgres-prod:
+        condition: service_healthy
+    networks:
+      - tamkin-prod-network
+      - tamkin-nginx-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+          cpus: "1.0"
+
+  # ============================================
+  # Frontend - Production
+  # ============================================
+  frontend-prod:
+    build:
+      context: ./tamkin-frontend
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: ${PROD_ENV}
+      PORT: ${FRONTEND_PORT}
+    depends_on:
+      - backend-prod
+    networks:
+      - tamkin-prod-network
+      - tamkin-nginx-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+          cpus: "1.0"
+
+  # ============================================
+  # Nginx - Single Instance
+  # ============================================
   nginx:
     image: nginx:alpine
-    container_name: tamkin-nginx-prod
     ports:
-      - "${NGINX_EXTERNAL_PORT}:80"
+      - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
-      tamkin-frontend:
-        condition: service_healthy
-      tamkin-backend:
-        condition: service_healthy
+      - frontend-test
+      - backend-test
+      - frontend-prod
+      - backend-prod
     networks:
-      - tamkin-network
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--quiet",
-          "--tries=1",
-          "--spider",
-          "http://localhost/health",
-        ]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 5s
+      - tamkin-nginx-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+          cpus: "0.5"
 
 networks:
-  tamkin-network:
+  # Test environment network (isolated)
+  tamkin-test-network:
+    driver: bridge
+
+  # Production environment network (isolated)
+  tamkin-prod-network:
+    driver: bridge
+
+  # Shared network for Nginx to access all containers
+  tamkin-nginx-network:
     driver: bridge
 
 volumes:
+  postgres-data-test:
   postgres-data-prod:
