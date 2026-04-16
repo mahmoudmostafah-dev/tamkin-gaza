@@ -10,20 +10,13 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-echo -e "${BLUE}🔒 SSL/HTTPS Setup with Certbot${NC}"
-
-# Check if running as root
-if [ "$EUID" -ne 0 ]; then 
-    echo -e "${RED}❌ Please run as root (use sudo)${NC}"
-    exit 1
-fi
+echo -e "${BLUE}🔒 SSL/HTTPS Setup with Certbot (Docker)${NC}"
 
 # Variables
-DOMAINS_PROD="tamkeengaza.org www.tamkeengaza.org"
-DOMAINS_TEST="test.tamkeengaza.org"
 EMAIL="Khaledjendeya2020@gmail.com"  # Change this!
-PROJECT_DIR="/home/ubuntu/tamkin-gaza"
+PROJECT_DIR="$HOME/tamkin-gaza"
 SSL_DIR="$PROJECT_DIR/nginx/ssl"
+CERTBOT_DIR="$PROJECT_DIR/certbot"
 
 echo -e "${YELLOW}📧 Email for SSL certificates: $EMAIL${NC}"
 read -p "Is this email correct? (yes/no): " confirm_email
@@ -31,59 +24,66 @@ if [ "$confirm_email" != "yes" ]; then
     read -p "Enter your email: " EMAIL
 fi
 
-# 1. Install Certbot
-echo -e "${YELLOW}📦 Installing Certbot...${NC}"
-apt update
-apt install -y certbot
+cd "$PROJECT_DIR" || exit 1
+
+# 1. Create directories
+echo -e "${YELLOW}� Creating directories...${NC}"
+mkdir -p "$SSL_DIR"
+mkdir -p "$CERTBOT_DIR/conf"
+mkdir -p "$CERTBOT_DIR/www"
 
 # 2. Stop Nginx temporarily
 echo -e "${YELLOW}🛑 Stopping Nginx...${NC}"
-cd "$PROJECT_DIR"
 docker compose stop nginx
 
-# 3. Obtain SSL certificates for Production
-echo -e "${YELLOW}🔐 Obtaining SSL certificate for PRODUCTION domains...${NC}"
-certbot certonly --standalone \
+# 3. Obtain SSL certificate for Production
+echo -e "${YELLOW}🔐 Obtaining SSL certificate for PRODUCTION (tamkeengaza.org)...${NC}"
+docker run --rm \
+    -v "$CERTBOT_DIR/conf:/etc/letsencrypt" \
+    -v "$CERTBOT_DIR/www:/var/www/certbot" \
+    -p 80:80 \
+    certbot/certbot certonly \
+    --standalone \
     --non-interactive \
     --agree-tos \
     --email "$EMAIL" \
     -d tamkeengaza.org \
     -d www.tamkeengaza.org
 
-# 4. Obtain SSL certificates for Test
-echo -e "${YELLOW}🔐 Obtaining SSL certificate for TEST domain...${NC}"
-certbot certonly --standalone \
+# 4. Obtain SSL certificate for Test
+echo -e "${YELLOW}🔐 Obtaining SSL certificate for TEST (test.tamkeengaza.org)...${NC}"
+docker run --rm \
+    -v "$CERTBOT_DIR/conf:/etc/letsencrypt" \
+    -v "$CERTBOT_DIR/www:/var/www/certbot" \
+    -p 80:80 \
+    certbot/certbot certonly \
+    --standalone \
     --non-interactive \
     --agree-tos \
     --email "$EMAIL" \
     -d test.tamkeengaza.org
 
-# 5. Create SSL directory
-echo -e "${YELLOW}📁 Creating SSL directory...${NC}"
-mkdir -p "$SSL_DIR"
-
-# 6. Copy certificates
+# 5. Copy certificates to nginx/ssl
 echo -e "${YELLOW}📋 Copying certificates...${NC}"
 
-# Production certificates
-cp /etc/letsencrypt/live/tamkeengaza.org/fullchain.pem "$SSL_DIR/tamkeengaza.org.crt"
-cp /etc/letsencrypt/live/tamkeengaza.org/privkey.pem "$SSL_DIR/tamkeengaza.org.key"
+# Production
+cp "$CERTBOT_DIR/conf/live/tamkeengaza.org/fullchain.pem" "$SSL_DIR/tamkeengaza.org.crt"
+cp "$CERTBOT_DIR/conf/live/tamkeengaza.org/privkey.pem" "$SSL_DIR/tamkeengaza.org.key"
 
-# Test certificates
-cp /etc/letsencrypt/live/test.tamkeengaza.org/fullchain.pem "$SSL_DIR/test.tamkeengaza.org.crt"
-cp /etc/letsencrypt/live/test.tamkeengaza.org/privkey.pem "$SSL_DIR/test.tamkeengaza.org.key"
+# Test
+cp "$CERTBOT_DIR/conf/live/test.tamkeengaza.org/fullchain.pem" "$SSL_DIR/test.tamkeengaza.org.crt"
+cp "$CERTBOT_DIR/conf/live/test.tamkeengaza.org/privkey.pem" "$SSL_DIR/test.tamkeengaza.org.key"
 
-# 7. Set proper permissions
+# 6. Set permissions
 echo -e "${YELLOW}🔐 Setting permissions...${NC}"
-chown -R ubuntu:ubuntu "$SSL_DIR"
 chmod 600 "$SSL_DIR"/*.key
 chmod 644 "$SSL_DIR"/*.crt
 
-# 8. Backup old nginx config
+# 7. Backup old nginx config
 echo -e "${YELLOW}💾 Backing up nginx config...${NC}"
 cp "$PROJECT_DIR/nginx/nginx.conf" "$PROJECT_DIR/nginx/nginx.conf.backup"
 
-# 9. Update nginx config with SSL
+# 8. Update nginx config with SSL
 echo -e "${YELLOW}⚙️  Updating nginx configuration...${NC}"
 cat > "$PROJECT_DIR/nginx/nginx.conf" << 'EOF'
 upstream frontend-test {
@@ -221,7 +221,7 @@ server {
 }
 EOF
 
-# 10. Test nginx config
+# 9. Test nginx config
 echo -e "${YELLOW}🧪 Testing nginx configuration...${NC}"
 docker compose run --rm nginx nginx -t || {
     echo -e "${RED}❌ Nginx config test failed! Restoring backup...${NC}"
@@ -229,27 +229,37 @@ docker compose run --rm nginx nginx -t || {
     exit 1
 }
 
-# 11. Start nginx
+# 10. Start nginx
 echo -e "${YELLOW}🚀 Starting Nginx with SSL...${NC}"
 docker compose up -d nginx
 
-# 12. Setup auto-renewal
+# 11. Setup auto-renewal cron job
 echo -e "${YELLOW}⏰ Setting up auto-renewal...${NC}"
-cat > /etc/cron.d/certbot-renew << 'CRON'
-# Renew certificates twice daily and reload nginx
-0 0,12 * * * root certbot renew --quiet --deploy-hook "cd /home/ubuntu/tamkin-gaza && docker compose restart nginx"
+CRON_FILE="/tmp/certbot-renew-cron"
+cat > "$CRON_FILE" << CRON
+# Renew SSL certificates twice daily
+0 0,12 * * * cd $PROJECT_DIR && ./renew-ssl.sh >> $PROJECT_DIR/certbot/renewal.log 2>&1
 CRON
 
-# 13. Test renewal
-echo -e "${YELLOW}🧪 Testing certificate renewal (dry-run)...${NC}"
-certbot renew --dry-run
+crontab -l 2>/dev/null | cat - "$CRON_FILE" | crontab -
+rm "$CRON_FILE"
 
-# 14. Show certificate info
+# 12. Test renewal (dry-run)
+echo -e "${YELLOW}🧪 Testing certificate renewal (dry-run)...${NC}"
+docker run --rm \
+    -v "$CERTBOT_DIR/conf:/etc/letsencrypt" \
+    -v "$CERTBOT_DIR/www:/var/www/certbot" \
+    certbot/certbot renew --dry-run
+
+# 13. Show certificate info
 echo -e "${YELLOW}📜 Certificate information:${NC}"
-certbot certificates
+docker run --rm \
+    -v "$CERTBOT_DIR/conf:/etc/letsencrypt" \
+    certbot/certbot certificates
 
 echo -e "${GREEN}✅ SSL/HTTPS setup completed successfully!${NC}"
 echo -e "${GREEN}🌐 Production: https://tamkeengaza.org${NC}"
 echo -e "${GREEN}🌐 Test: https://test.tamkeengaza.org${NC}"
 echo -e "${BLUE}📝 Certificates will auto-renew every 90 days${NC}"
-echo -e "${BLUE}💾 Nginx config backup saved to: nginx/nginx.conf.backup${NC}"
+echo -e "${BLUE}💾 Nginx config backup: nginx/nginx.conf.backup${NC}"
+echo -e "${BLUE}📁 Certificates stored in: $CERTBOT_DIR/conf${NC}"

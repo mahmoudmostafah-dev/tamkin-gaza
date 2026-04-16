@@ -43,7 +43,5 @@ Thumbs.db
 coverage/
 .nyc_output/
 
-# Docker volumes data
-postgres-data/
-postgres-data-prod/
-postgres-data-test/
+# Certbot data
+certbot/
