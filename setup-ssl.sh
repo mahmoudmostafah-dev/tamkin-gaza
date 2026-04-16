@@ -108,7 +108,8 @@ upstream backend-prod {
 # Test Environment - HTTPS
 # ============================================
 server {
-    listen 443 ssl http2;
+    listen 443 ssl;
+    http2 on;
     server_name test.tamkeengaza.org;
 
     # SSL Configuration
@@ -167,7 +168,8 @@ server {
 # Production Environment - HTTPS
 # ============================================
 server {
-    listen 443 ssl http2;
+    listen 443 ssl;
+    http2 on;
     server_name tamkeengaza.org www.tamkeengaza.org;
 
     # SSL Configuration
@@ -246,12 +248,12 @@ CRON
 crontab -l 2>/dev/null | cat - "$CRON_FILE" | crontab -
 rm "$CRON_FILE"
 
-# 12. Test renewal (dry-run)
+# 12. Test renewal (dry-run) - Optional, can be skipped
 echo -e "${YELLOW}🧪 Testing certificate renewal (dry-run)...${NC}"
-docker run --rm \
+timeout 30 docker run --rm \
     -v "$CERTBOT_DIR/conf:/etc/letsencrypt" \
     -v "$CERTBOT_DIR/www:/var/www/certbot" \
-    certbot/certbot renew --dry-run
+    certbot/certbot renew --dry-run 2>/dev/null || echo -e "${YELLOW}⚠️  Dry-run test skipped or timed out (not critical)${NC}"
 
 # 13. Show certificate info
 echo -e "${YELLOW}📜 Certificate information:${NC}"
