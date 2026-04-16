@@ -28,19 +28,20 @@ echo -e "${YELLOW}📋 Copying renewed certificates...${NC}"
 
 # Production
 if [ -f "$CERTBOT_DIR/conf/live/tamkeengaza.org/fullchain.pem" ]; then
-    cp "$CERTBOT_DIR/conf/live/tamkeengaza.org/fullchain.pem" "$SSL_DIR/tamkeengaza.org.crt"
-    cp "$CERTBOT_DIR/conf/live/tamkeengaza.org/privkey.pem" "$SSL_DIR/tamkeengaza.org.key"
+    sudo cp "$CERTBOT_DIR/conf/live/tamkeengaza.org/fullchain.pem" "$SSL_DIR/tamkeengaza.org.crt"
+    sudo cp "$CERTBOT_DIR/conf/live/tamkeengaza.org/privkey.pem" "$SSL_DIR/tamkeengaza.org.key"
     echo -e "${GREEN}✅ Production certificates updated${NC}"
 fi
 
 # Test
 if [ -f "$CERTBOT_DIR/conf/live/test.tamkeengaza.org/fullchain.pem" ]; then
-    cp "$CERTBOT_DIR/conf/live/test.tamkeengaza.org/fullchain.pem" "$SSL_DIR/test.tamkeengaza.org.crt"
-    cp "$CERTBOT_DIR/conf/live/test.tamkeengaza.org/privkey.pem" "$SSL_DIR/test.tamkeengaza.org.key"
+    sudo cp "$CERTBOT_DIR/conf/live/test.tamkeengaza.org/fullchain.pem" "$SSL_DIR/test.tamkeengaza.org.crt"
+    sudo cp "$CERTBOT_DIR/conf/live/test.tamkeengaza.org/privkey.pem" "$SSL_DIR/test.tamkeengaza.org.key"
     echo -e "${GREEN}✅ Test certificates updated${NC}"
 fi
 
 # 3. Set permissions
+sudo chown -R $USER:$USER "$SSL_DIR"
 chmod 600 "$SSL_DIR"/*.key
 chmod 644 "$SSL_DIR"/*.crt
 
