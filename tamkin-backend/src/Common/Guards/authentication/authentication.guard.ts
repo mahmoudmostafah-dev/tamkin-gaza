@@ -5,7 +5,6 @@ import { ResponseService } from 'src/Common/Services/Response/response.service';
 import { TranslationService } from 'src/Common/Services/Translation/translation.service';
 import { TokenService } from 'src/Common/Services/Security/token.service';
 import { IRequest } from 'src/Common/Types/request.types';
-import { ILanguageRequest } from 'src/Common/Interfaces/Language/language-request.interface';
 
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
@@ -32,7 +31,7 @@ export class AuthenticationGuard implements CanActivate {
     authorization = req.cookies['access_token'];
 
     if (!authorization || authorization === '') {
-      const userLang = (req as ILanguageRequest).userLanguage;
+      const userLang = req.userLanguage;
       throw this.responseService.forbidden({
         message: this.translationService.translate(
           'token:errors.you_are_not_authorized_to_access_this_resource',

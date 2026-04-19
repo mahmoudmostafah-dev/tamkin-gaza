@@ -1,24 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { JsonFileService } from '../Json/json-file.service';
 import { LanguageCode } from 'src/Common/Interfaces/Language/languages-config.interface';
 import languagesConfig from '../../../Config/Language/language.json';
+import { REQUEST } from '@nestjs/core';
+import type { IRequest } from 'src/Common/Types/request.types';
 
 @Injectable()
 export class TranslationService {
-  constructor(private jsonFileProvider: JsonFileService) {}
+  constructor(
+    private readonly jsonFileProvider: JsonFileService,
+    @Inject(REQUEST) private readonly request: IRequest,
+  ) {}
 
-  public translate(
-    key: string,
-    userLanguage: string,
-    context?: { prop?: any },
-  ): string {
+  public translate(key: string, context?: { prop?: any }): string {
+    const userLanguage = this.request.userLanguage;
     return this.jsonFileProvider.get(userLanguage, key, context);
   }
 
-  public translateToDefaultLanguage(
-    key: string,
-    context?: { prop?: any },
-  ): string {
+  public translateToDefaultLanguage(key: string, context?: { prop?: any }): string {
     const defaultLanguageCode = this.getDefaultLanguageCode();
     return this.jsonFileProvider.get(defaultLanguageCode, key, context);
   }
@@ -28,9 +27,7 @@ export class TranslationService {
     return this.validateAndExtractDefault(data);
   }
 
-  private validateAndExtractDefault(
-    data: typeof languagesConfig,
-  ): LanguageCode {
+  private validateAndExtractDefault(data: typeof languagesConfig): LanguageCode {
     const defaultEntries = data.filter((item) => {
       const code = Object.keys(item)[0];
       const config = (item as any)[code];
@@ -38,9 +35,7 @@ export class TranslationService {
     });
 
     if (defaultEntries.length === 0)
-      throw new Error(
-        'Invalid language.json: No language is marked as "isDefault": true.',
-      );
+      throw new Error('Invalid language.json: No language is marked as "isDefault": true.');
 
     if (defaultEntries.length > 1) {
       const foundCodes = defaultEntries.map((entry) => Object.keys(entry)[0]);

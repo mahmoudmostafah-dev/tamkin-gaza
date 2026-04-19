@@ -7,7 +7,6 @@ import { UserModel } from 'src/DataBase/Models/user.model';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Request, Response } from 'express';
-import { ILanguageRequest } from 'src/Common/Interfaces/Language/language-request.interface';
 import { TokenTypeEnum } from 'src/Common/Enums/token.enum';
 import { CookiesService } from 'src/Common/Services/Cookies/cookies.service';
 import { UserProviderEnum } from 'src/Common/Enums/User/user.enum';
@@ -15,6 +14,7 @@ import countries from 'i18n-iso-countries';
 import { TokenService } from 'src/Common/Services/Security/token.service';
 import { ClientInfoService } from 'src/Common/Services/Security/client-info.service';
 import { HashingService } from 'src/Common/Services/Security/Hash/hash.service';
+import { IRequest } from 'src/Common/Types/request.types';
 
 @Injectable()
 export class AuthService {
@@ -30,9 +30,11 @@ export class AuthService {
     private readonly hashingService: HashingService,
   ) {}
 
-  async loginWithGoogle(req: Request, res: Response, body: GoogleLoginDto) {
-    const { email, picture, given_name, family_name } =
-      await this.googleAuth.verifyGmailAccount(body.id_token, req);
+  async loginWithGoogle(req: IRequest, res: Response, body: GoogleLoginDto) {
+    const { email, picture, given_name, family_name } = await this.googleAuth.verifyGmailAccount(
+      body.id_token,
+      req,
+    );
 
     let user = await this.userModel.findOne({
       where: { email },
@@ -52,15 +54,10 @@ export class AuthService {
       });
 
       if (!newUser) {
-        const userLang = (req as ILanguageRequest).userLanguage;
         throw this.responseService.serverError({
-          message: this.translationService.translate(
-            'auth:errors.fail_to_create_user',
-            userLang,
-          ),
+          message: this.translationService.translate('auth:errors.fail_to_create_user'),
           info: this.translationService.translate(
             'auth:errors.something_went_wrong_please_try_again',
-            userLang,
           ),
         });
       }
@@ -68,12 +65,9 @@ export class AuthService {
       user = newUser;
     }
 
-    const tokens = await this.tokenService.createLoginCredentials(
-      user.uuid,
-      user.role,
-    );
+    const tokens = await this.tokenService.createLoginCredentials(user.uuid, user.role);
 
-    const session = this.clientInfoService.getUserSessionContext(req);
+    const session = this.clientInfoService.getUserSessionContext(req as Request);
 
     Promise.all([
       this.tokenService.saveJwt(
@@ -93,16 +87,8 @@ export class AuthService {
       ),
     ]);
 
-    this.cookiesService.setTokenToCookies(
-      res,
-      tokens.access_token.token,
-      TokenTypeEnum.ACCESS,
-    );
-    this.cookiesService.setTokenToCookies(
-      res,
-      tokens.refresh_token.token,
-      TokenTypeEnum.REFRESH,
-    );
+    this.cookiesService.setTokenToCookies(res, tokens.access_token.token, TokenTypeEnum.ACCESS);
+    this.cookiesService.setTokenToCookies(res, tokens.refresh_token.token, TokenTypeEnum.REFRESH);
 
     return {
       user,
@@ -110,32 +96,23 @@ export class AuthService {
     };
   }
 
-  async register(req: Request, res: Response, body: RegisterDto) {
+  async register(req: IRequest, res: Response, body: RegisterDto) {
     let user = await this.userModel.findOne({
       where: { email: body.email },
     });
 
     if (user) {
-      const userLang = (req as ILanguageRequest).userLanguage;
       throw this.responseService.badRequest({
-        message: this.translationService.translate(
-          'auth:errors.email_already_exists',
-          userLang,
-        ),
+        message: this.translationService.translate('auth:errors.email_already_exists'),
         info: this.translationService.translate(
           'auth:errors.this_accountIs_already_registered_please_login',
-          userLang,
         ),
       });
     }
 
     if (body.password !== body.confirmPassword) {
-      const userLang = (req as ILanguageRequest).userLanguage;
       throw this.responseService.badRequest({
-        message: this.translationService.translate(
-          'auth:validation.passwordsNotMatch',
-          userLang,
-        ),
+        message: this.translationService.translate('auth:validation.passwordsNotMatch'),
       });
     }
 
@@ -150,23 +127,15 @@ export class AuthService {
     });
 
     if (!newUser) {
-      const userLang = (req as ILanguageRequest).userLanguage;
       throw this.responseService.serverError({
-        message: this.translationService.translate(
-          'auth:errors.fail_to_create_user',
-          userLang,
-        ),
+        message: this.translationService.translate('auth:errors.fail_to_create_user'),
         info: this.translationService.translate(
           'auth:errors.something_went_wrong_please_try_again',
-          userLang,
         ),
       });
     }
 
-    const tokens = await this.tokenService.createLoginCredentials(
-      newUser.uuid,
-      newUser.role,
-    );
+    const tokens = await this.tokenService.createLoginCredentials(newUser.uuid, newUser.role);
 
     const session = this.clientInfoService.getUserSessionContext(req);
 
@@ -188,16 +157,8 @@ export class AuthService {
       ),
     ]);
 
-    this.cookiesService.setTokenToCookies(
-      res,
-      tokens.access_token.token,
-      TokenTypeEnum.ACCESS,
-    );
-    this.cookiesService.setTokenToCookies(
-      res,
-      tokens.refresh_token.token,
-      TokenTypeEnum.REFRESH,
-    );
+    this.cookiesService.setTokenToCookies(res, tokens.access_token.token, TokenTypeEnum.ACCESS);
+    this.cookiesService.setTokenToCookies(res, tokens.refresh_token.token, TokenTypeEnum.REFRESH);
 
     return {
       user: newUser,
@@ -210,37 +171,20 @@ export class AuthService {
     });
 
     if (!user || !user.password) {
-      const userLang = (req as ILanguageRequest).userLanguage;
       throw this.responseService.badRequest({
-        message: this.translationService.translate(
-          'auth:errors.invalid_credentials',
-          userLang,
-        ),
-        info: this.translationService.translate(
-          'auth:errors.invalid_credentials_info',
-          userLang,
-        ),
+        message: this.translationService.translate('auth:errors.invalid_credentials'),
+        info: this.translationService.translate('auth:errors.invalid_credentials_info'),
       });
     }
 
     if (!(await this.hashingService.compare(body.password, user.password))) {
-      const userLang = (req as ILanguageRequest).userLanguage;
       throw this.responseService.badRequest({
-        message: this.translationService.translate(
-          'auth:errors.invalid_credentials',
-          userLang,
-        ),
-        info: this.translationService.translate(
-          'auth:errors.invalid_credentials_info',
-          userLang,
-        ),
+        message: this.translationService.translate('auth:errors.invalid_credentials'),
+        info: this.translationService.translate('auth:errors.invalid_credentials_info'),
       });
     }
 
-    const tokens = await this.tokenService.createLoginCredentials(
-      user.uuid,
-      user.role,
-    );
+    const tokens = await this.tokenService.createLoginCredentials(user.uuid, user.role);
 
     const session = this.clientInfoService.getUserSessionContext(req);
 
@@ -262,16 +206,8 @@ export class AuthService {
       ),
     ]);
 
-    this.cookiesService.setTokenToCookies(
-      res,
-      tokens.access_token.token,
-      TokenTypeEnum.ACCESS,
-    );
-    this.cookiesService.setTokenToCookies(
-      res,
-      tokens.refresh_token.token,
-      TokenTypeEnum.REFRESH,
-    );
+    this.cookiesService.setTokenToCookies(res, tokens.access_token.token, TokenTypeEnum.ACCESS);
+    this.cookiesService.setTokenToCookies(res, tokens.refresh_token.token, TokenTypeEnum.REFRESH);
 
     return {
       user,

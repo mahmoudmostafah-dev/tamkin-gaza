@@ -4,6 +4,7 @@ import { ResponseService } from 'src/Common/Services/Response/response.service';
 import { TranslationService } from 'src/Common/Services/Translation/translation.service';
 import { Request } from 'express';
 import { ILanguageRequest } from 'src/Common/Interfaces/Language/language-request.interface';
+import { IRequest } from 'src/Common/Types/request.types';
 
 @Injectable()
 export class GoogleAuthService {
@@ -12,10 +13,7 @@ export class GoogleAuthService {
     private readonly translationService: TranslationService,
   ) {}
 
-  verifyGmailAccount = async (
-    id_token: string,
-    req: Request,
-  ): Promise<TokenPayload> => {
+  verifyGmailAccount = async (id_token: string, req: IRequest): Promise<TokenPayload> => {
     try {
       const client = new OAuth2Client();
 
@@ -57,10 +55,7 @@ export class GoogleAuthService {
             'auth:errors.fail_to_Verify_this_token',
             userLang,
           ),
-          info: this.translationService.translate(
-            'auth:errors.token_used_too_late',
-            userLang,
-          ),
+          info: this.translationService.translate('auth:errors.token_used_too_late', userLang),
         });
       } else {
         throw this.responseService.badRequest({
