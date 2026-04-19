@@ -3,27 +3,27 @@ import { IsCountryCode } from "./country.validate";
 import { USER_REGEX } from "../Regex/User/user.regex";
 
 export class UserValidators {
-    @Matches(USER_REGEX.fullName)
-    @IsString()
-    @IsNotEmpty()
+    @Matches(USER_REGEX.fullName, { message: 'validation:user.invalid_full_name' })
+    @IsString({ message: 'validation:global.is_string' })
+    @IsNotEmpty({ message: 'validation:global.is_not_empty' })
     fullName:string;
 
-    @IsStrongPassword()
-    @IsString()
-    @IsNotEmpty()
+    @IsStrongPassword({}, { message: 'validation:global.is_strong_password' })
+    @IsString({ message: 'validation:global.is_string' })
+    @IsNotEmpty({ message: 'validation:global.is_not_empty' })
     password:string;
 
-    @IsEmail()
-    @IsString()
-    @IsNotEmpty()
+    @IsEmail({}, { message: 'validation:global.is_email' })
+    @IsString({ message: 'validation:global.is_string' })
+    @IsNotEmpty({ message: 'validation:global.is_not_empty' })
     email:string;
 
-    @IsString()
-    @IsNotEmpty()
+    @IsString({ message: 'validation:global.is_string' })
+    @IsNotEmpty({ message: 'validation:global.is_not_empty' })
     confirmPassword:string;
 
-    @Validate(IsCountryCode)
-    @IsString()
-    @IsNotEmpty()
+    @Validate(IsCountryCode, { message: 'validation:user.invalid_country_code' })
+    @IsString({ message: 'validation:global.is_string' })
+    @IsNotEmpty({ message: 'validation:global.is_not_empty' })
     nationality:string;
 }

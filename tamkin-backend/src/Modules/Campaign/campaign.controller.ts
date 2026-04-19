@@ -2,7 +2,6 @@ import { Body, Controller, Get, HttpStatus, Param, Post, Req } from '@nestjs/com
 import { CreateCampaignDto } from './Dtos/create-campaign.dto';
 import { CampaignService } from './campaign.service';
 import { ResponseService } from 'src/Common/Services/Response/response.service';
-import { TranslationService } from 'src/Common/Services/Translation/translation.service';
 import type { IRequest } from 'src/Common/Types/request.types';
 
 @Controller('campaign')
@@ -10,16 +9,13 @@ export class CampaignController {
   constructor(
     private readonly campaignService: CampaignService,
     private readonly responseService: ResponseService,
-    private readonly translationService: TranslationService,
   ) {}
   @Post()
   async createCampaign(@Body() createCampaignDto: CreateCampaignDto) {
     const campaign = await this.campaignService.create(createCampaignDto);
     return this.responseService.success({
       statusCode: HttpStatus.CREATED,
-      message: await this.translationService.translate(
-        'campaign:success.campaign_created_successfully',
-      ),
+      message: 'campaign:success.campaign_created_successfully',
       data: campaign,
     });
   }

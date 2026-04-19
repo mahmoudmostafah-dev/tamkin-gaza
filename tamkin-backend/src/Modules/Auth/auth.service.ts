@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GoogleLoginDto, LoginDto, RegisterDto } from './Dto/register.dto';
 import { ResponseService } from 'src/Common/Services/Response/response.service';
-import { TranslationService } from 'src/Common/Services/Translation/translation.service';
 import { GoogleAuthService } from './Google-Auth/google.auth';
 import { UserModel } from 'src/DataBase/Models/user.model';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,12 +14,14 @@ import { TokenService } from 'src/Common/Services/Security/token.service';
 import { ClientInfoService } from 'src/Common/Services/Security/client-info.service';
 import { HashingService } from 'src/Common/Services/Security/Hash/hash.service';
 import { IRequest } from 'src/Common/Types/request.types';
+import { OTPTypeEnum } from 'src/Common/Enums/Otp/otp.enum';
+import { OTPService } from 'src/Common/Services/Otp/otp.service';
+import { ConfirmEmailDto } from './Dto/confirm.email.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly responseService: ResponseService,
-    private readonly translationService: TranslationService,
     private readonly googleAuth: GoogleAuthService,
     @InjectRepository(UserModel)
     private readonly userModel: Repository<UserModel>,
@@ -28,7 +29,8 @@ export class AuthService {
     private readonly clientInfoService: ClientInfoService,
     private readonly cookiesService: CookiesService,
     private readonly hashingService: HashingService,
-  ) {}
+    private readonly otpService: OTPService
+  ) { }
 
   async loginWithGoogle(req: IRequest, res: Response, body: GoogleLoginDto) {
     const { email, picture, given_name, family_name } = await this.googleAuth.verifyGmailAccount(
@@ -55,10 +57,8 @@ export class AuthService {
 
       if (!newUser) {
         throw this.responseService.serverError({
-          message: this.translationService.translate('auth:errors.fail_to_create_user'),
-          info: this.translationService.translate(
-            'auth:errors.something_went_wrong_please_try_again',
-          ),
+          message: 'auth:errors.fail_to_create_user',
+          info: 'auth:errors.something_went_wrong_please_try_again',
         });
       }
 
@@ -67,7 +67,7 @@ export class AuthService {
 
     const tokens = await this.tokenService.createLoginCredentials(user.uuid, user.role);
 
-    const session = this.clientInfoService.getUserSessionContext(req as Request);
+    const session = this.clientInfoService.getUserSessionContext(req);
 
     Promise.all([
       this.tokenService.saveJwt(
@@ -103,22 +103,20 @@ export class AuthService {
 
     if (user) {
       throw this.responseService.badRequest({
-        message: this.translationService.translate('auth:errors.email_already_exists'),
-        info: this.translationService.translate(
-          'auth:errors.this_accountIs_already_registered_please_login',
-        ),
+        message: 'auth:errors.email_already_exists',
+        info: 'auth:errors.this_account_is_already_registered_please_login',
       });
     }
 
     if (body.password !== body.confirmPassword) {
       throw this.responseService.badRequest({
-        message: this.translationService.translate('auth:validation.passwordsNotMatch'),
+        message: 'validation:user.passwords_not_match',
       });
     }
 
     const newUser: UserModel = await this.userModel.save({
       email: body.email,
-      password: await this.hashingService.hashPassword(body.password),
+      password: await this.hashingService.generateHash({ text: body.password }),
       firstName: body.fullName.split(' ')[0],
       lastName: body.fullName.split(' ')[1],
       nationality: countries.getName(body.nationality, 'en'),
@@ -128,10 +126,8 @@ export class AuthService {
 
     if (!newUser) {
       throw this.responseService.serverError({
-        message: this.translationService.translate('auth:errors.fail_to_create_user'),
-        info: this.translationService.translate(
-          'auth:errors.something_went_wrong_please_try_again',
-        ),
+        message: 'auth:errors.fail_to_create_user',
+        info: 'auth:errors.something_went_wrong_please_try_again',
       });
     }
 
@@ -165,22 +161,22 @@ export class AuthService {
     };
   }
 
-  async login(req: Request, res: Response, body: LoginDto) {
+  async login(req: IRequest, res: Response, body: LoginDto) {
     let user = await this.userModel.findOne({
       where: { email: body.email },
     });
 
     if (!user || !user.password) {
       throw this.responseService.badRequest({
-        message: this.translationService.translate('auth:errors.invalid_credentials'),
-        info: this.translationService.translate('auth:errors.invalid_credentials_info'),
+        message: 'auth:errors.invalid_credentials',
+        info: 'auth:errors.invalid_credentials_info',
       });
     }
 
-    if (!(await this.hashingService.compare(body.password, user.password))) {
+    if (!(await this.hashingService.compareHash({ plainText: body.password, hashText: user.password }))) {
       throw this.responseService.badRequest({
-        message: this.translationService.translate('auth:errors.invalid_credentials'),
-        info: this.translationService.translate('auth:errors.invalid_credentials_info'),
+        message: 'auth:errors.invalid_credentials',
+        info: 'auth:errors.invalid_credentials_info',
       });
     }
 
@@ -213,6 +209,7 @@ export class AuthService {
       user,
     };
   }
+
   async logout(req: Request, res: Response) {
     const access_token = req.cookies['access_token'];
     const refresh_token = req.cookies['refresh_token'];
@@ -222,4 +219,57 @@ export class AuthService {
     this.cookiesService.removeTokenFromCookies(res, TokenTypeEnum.ACCESS);
     this.cookiesService.removeTokenFromCookies(res, TokenTypeEnum.REFRESH);
   }
+
+  async requestConfirmEmail(req: IRequest, res: Response) {
+
+    if (req.user?.emailVerified) {
+      throw this.responseService.badRequest({
+        message: 'auth:errors.email_already_verified',
+        info: 'auth:errors.email_already_verified_info'
+      });
+    }
+
+    const result = await this.otpService.sendOTP({
+      userId: req.user!._id,
+      email: req.user!.email,
+      userName: req.user!.firstName,
+      type: OTPTypeEnum.CONFIRM_EMAIL,
+
+    });
+
+    if (!result) {
+      throw this.responseService.badRequest({
+        message: 'auth:errors.fail_to_send_otp',
+        info: 'auth:errors.fail_to_send_otp_info'
+      });
+    }
+
+  }
+
+  async confirmEmail(req: IRequest, body: ConfirmEmailDto) {
+
+    if (req.user?.emailVerified) {
+      throw this.responseService.badRequest({
+        message: 'email:errors.email_already_verified',
+        info: 'email:errors.email_already_verified_info'
+      });
+    }
+
+    const result = await this.otpService.verifyOTP({
+      userId: req.user!._id,
+      code: body.code,
+      type: OTPTypeEnum.CONFIRM_EMAIL,
+    });
+
+    if (!result) {
+      throw this.responseService.badRequest({
+        message: 'email:errors.otp_invalid',
+        info: 'email:errors.otp_invalid_info'
+      });
+    }
+
+    await this.userModel.update(req.user!._id, { emailVerified: true });
+
+  }
+
 }

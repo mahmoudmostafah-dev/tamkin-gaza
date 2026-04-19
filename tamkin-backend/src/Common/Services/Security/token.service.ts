@@ -8,25 +8,23 @@ import { UserModel } from '../../../DataBase/Models/user.model';
 import { UserRoleEnum } from '../../Enums/User/user.enum';
 import { ISignToken, IDecoded } from '../../Types/token.types';
 import { SignatureLevelEnum } from '../../Enums/User/signature.level.enum';
-import type { Request } from 'express';
 import { ResponseService } from '../Response/response.service';
 import { TranslationService } from '../Translation/translation.service';
 import { HashingService } from './Hash/hash.service';
 import { ISession } from 'src/Common/Interfaces/Security/client-info.interface';
-import { ILanguageRequest } from 'src/Common/Interfaces/Language/language-request.interface';
+import type { IRequest } from 'src/Common/Types/request.types';
 
 @Injectable({ scope: Scope.REQUEST })
 export class TokenService {
   constructor(
     private readonly hashingService: HashingService,
     private readonly responseService: ResponseService,
-    private readonly translationService: TranslationService,
     @InjectRepository(JwtModel)
     private readonly jwtRepository: Repository<JwtModel>,
     @InjectRepository(UserModel)
     private readonly userRepository: Repository<UserModel>,
     @Inject('REQUEST')
-    private readonly request: Request,
+    private readonly request: IRequest,
   ) {}
 
   private getSecretKey(
@@ -65,12 +63,8 @@ export class TokenService {
     }
 
     if (!key) {
-      const userLang = (this.request as ILanguageRequest).userLanguage;
       throw this.responseService.serverError({
-        message: this.translationService.translate(
-          'token:errors.secret_key_missing',
-          userLang,
-        ),
+        message: 'token:errors.secret_key_missing',
       });
     }
 
@@ -173,7 +167,7 @@ export class TokenService {
 
     await this.jwtRepository.save({
       userId,
-      token: await this.hashingService.generateHash(token),
+      token: await this.hashingService.generateHash({text:token}),
       type,
       jti,
       ipAddress: session.ipAddress,
@@ -190,12 +184,8 @@ export class TokenService {
     try {
       return jwt.verify(token, secretKey) as IDecoded;
     } catch (error: any) {
-      const userLang = (this.request as ILanguageRequest).userLanguage;
       throw this.responseService.unauthorized({
-        message: this.translationService.translate(
-          'auth:errors.token_validation_failed',
-          userLang,
-        ),
+        message: 'auth:errors.token_validation_failed',
         info: error.message,
       });
     }
@@ -254,34 +244,22 @@ export class TokenService {
     try {
       decoded = await this.verifyToken(token.split(' ')[1], SECRET_KEY);
     } catch (error: any) {
-      const userLang = (this.request as ILanguageRequest).userLanguage;
-      const message = this.translationService.translate(
-        'token:errors.token_validation_failed',
-        userLang,
-      );
-
       if (error.name === 'TokenExpiredError') {
         throw this.responseService.unauthorized({
-          message: message,
-          info: this.translationService.translate(
-            'token:errors.token_expired',
-            userLang,
-          ),
+          message: 'token:errors.token_validation_failed',
+          info: 'token:errors.token_expired',
         });
       }
 
       if (error.name === 'JsonWebTokenError') {
         throw this.responseService.unauthorized({
-          message: message,
-          info: this.translationService.translate(
-            'auth:errors.token_validation_failed',
-            userLang,
-          ),
+          message: 'token:errors.token_validation_failed',
+          info: 'auth:errors.token_validation_failed',
         });
       }
 
       throw this.responseService.unauthorized({
-        message: message,
+        message: 'token:errors.token_validation_failed',
         info: error.message,
       });
     }
@@ -304,16 +282,9 @@ export class TokenService {
     });
 
     if (!user) {
-      const userLang = (this.request as ILanguageRequest).userLanguage;
       throw this.responseService.unauthorized({
-        message: this.translationService.translate(
-          'token:errors.user_account_not_found',
-          userLang,
-        ),
-        info: this.translationService.translate(
-          'token:errors.the_associated_account_could_not_be_located',
-          userLang,
-        ),
+        message: 'token:errors.user_account_not_found',
+        info: 'token:errors.the_associated_account_could_not_be_located',
       });
     }
 
@@ -321,89 +292,50 @@ export class TokenService {
       adminSetting?.changeCredentialsTime &&
       adminSetting.changeCredentialsTime > new Date(decoded.iat * 1000)
     ) {
-      const userLang = (this.request as ILanguageRequest).userLanguage;
       throw this.responseService.unauthorized({
-        message: this.translationService.translate(
-          'token:errors.token_invalidated_by_recent_credential_change',
-          userLang,
-        ),
-        info: this.translationService.translate(
-          'token:errors.your_password_or_account_settings_have_been_updated_please_log_in_again',
-          userLang,
-        ),
+        message: 'token:errors.token_invalidated_by_recent_credential_change',
+        info: 'token:errors.your_password_or_account_settings_have_been_updated_please_log_in_again',
       });
     }
 
     if (!jwt) {
-      const userLang = (this.request as ILanguageRequest).userLanguage;
       throw this.responseService.unauthorized({
-        message: this.translationService.translate(
-          'token:errors.invalid_or_revoked_session',
-          userLang,
-        ),
-        info: this.translationService.translate(
-          'token:errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
-          userLang,
-        ),
+        message: 'token:errors.invalid_or_revoked_session',
+        info: 'token:errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
       });
     }
 
     if (jwt.type !== type) {
-      const userLang = (this.request as ILanguageRequest).userLanguage;
       throw this.responseService.unauthorized({
-        message: this.translationService.translate(
-          'token:errors.invalid_token_type',
-          userLang,
-        ),
-        info: this.translationService.translate(
-          'token:errors.the_provided_token_does_not_match_the_required_token_type',
-          userLang,
-        ),
+        message: 'token:errors.invalid_token_type',
+        info: 'token:errors.the_provided_token_does_not_match_the_required_token_type',
       });
     }
 
     if (jwt.revoked) {
-      const userLang = (this.request as ILanguageRequest).userLanguage;
       throw this.responseService.unauthorized({
-        message: this.translationService.translate(
-          'token:errors.session_expired_please_log_in_again',
-          userLang,
-        ),
-        info: this.translationService.translate(
-          'token:errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
-          userLang,
-        ),
+        message: 'token:errors.session_expired_please_log_in_again',
+        info: 'token:errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
       });
     }
 
     if (jwt.expiresAt < new Date()) {
-      const userLang = (this.request as ILanguageRequest).userLanguage;
       if (jwt.type === TokenTypeEnum.REFRESH) {
         throw this.responseService.unauthorized({
-          message: this.translationService.translate(
-            'token:errors.refresh_token_has_expired',
-            userLang,
-          ),
-          info: this.translationService.translate(
-            'token:errors.your_session_has_timed_out_please_log_in_again',
-            userLang,
-          ),
+          message: 'token:errors.refresh_token_has_expired',
+          info: 'token:errors.your_session_has_timed_out_please_log_in_again',
         });
       }
 
       throw this.responseService.unauthorized({
-        message: this.translationService.translate(
-          'token:errors.access_token_has_expired',
-          userLang,
-        ),
-        info: this.translationService.translate(
-          'token:errors.your_access_token_has_timed_out_please_refresh_your_session',
-          userLang,
-        ),
+        message: 'token:errors.access_token_has_expired',
+        info: 'token:errors.your_access_token_has_timed_out_please_refresh_your_session',
       });
     }
 
-    if (!(await this.hashingService.compare(token, jwt.token))) {
+
+
+    if (!(await this.hashingService.compareHash({hashText:jwt.token,plainText:token}))) {
       await this.revokeAllTokensForUser({ userId: user._id });
 
       /*       this.appLogger.warn({
@@ -416,16 +348,9 @@ export class TokenService {
               }
             })
        */
-      const userLang = (this.request as ILanguageRequest).userLanguage;
       throw this.responseService.unauthorized({
-        message: this.translationService.translate(
-          'token:errors.session_expired_please_log_in_again',
-          userLang,
-        ),
-        info: this.translationService.translate(
-          'token:errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
-          userLang,
-        ),
+        message: 'token:errors.session_expired_please_log_in_again',
+        info: 'token:errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
       });
     }
 

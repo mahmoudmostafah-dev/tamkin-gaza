@@ -5,35 +5,43 @@ import { createHmac } from 'node:crypto';
 
 @Injectable()
 export class HashingService {
-  constructor(private configService: ConfigService) {}
-  private saltOverride = 10;
-  async hashPassword(text: string): Promise<string> {
-    const defaultSalt = this.configService.get<number>('HASH_SALT', 10);
-    const salt = this.saltOverride || defaultSalt;
+  constructor(private configService: ConfigService) { }
 
-    return await bcrypt.hash(text, Number(salt));
+
+  generateHash = async (
+    {
+      text,
+      salt = process.env.HASH_SALT ? parseInt(process.env.HASH_SALT) : 10
+    }: {
+      text: string,
+      salt?: number
+    }
+  ) => {
+    return await bcrypt.hash(text, salt || 10);
   }
 
-  async compare(plainText: string, hashText: string): Promise<boolean> {
-    return await bcrypt.compare(plainText, hashText);
+  compareHash = async ({ plainText, hashText }: {
+    plainText: string,
+    hashText: string
+  }) => {
+    return await bcrypt.compare(plainText, hashText)
   }
 
-  hashEmail(email: string): string {
-    const secret = this.configService.get<string>('EMAIL_HASH_SECRET');
-    if (!secret)
-      throw new InternalServerErrorException('EMAIL_HASH_SECRET is not set');
-
-    return this.generateHash(email, secret);
+  hashEmail = (email: string) => {
+    const secret = process.env.EMAIL_HASH_SECRET;
+    if (!secret) throw new Error('EMAIL_HASH_SECRET is not set');
+    return createHmac('sha256', secret).update(email).digest('hex')
   }
 
-  hashToken(token: string): string {
-    const secret = this.configService.get<string>('TOKEN_HASH_SECRET');
-    if (!secret)
-      throw new InternalServerErrorException('TOKEN_HASH_SECRET is not set');
+  hashToken = (token: string) => {
+    const secret = process.env.TOKEN_HASH_SECRET;
+    if (!secret) throw new Error("TOKEN_HASH_SECRET is not set");
 
-    return this.generateHash(token, secret);
+    return createHmac("sha256", secret)
+      .update(token)
+      .digest("hex");
   }
-  generateHash(text: string, secret: string = process.env.CRYPTO_KEY || 'secret') {
-    return createHmac('sha256', secret).update(text).digest('hex');
-  }
+
+
+
 }

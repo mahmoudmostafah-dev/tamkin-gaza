@@ -1,5 +1,5 @@
 {
-  "title_required": "Başlık alanı gereklidir. Dil anahtarları içeren bir nesne olmalıdır: {prop}",
+  "title_required": "tr",
   "title_invalid": "Başlık alanı geçersiz. Dil anahtarları içeren bir nesne olmalıdır: {prop}",
   "description_required": "Açıklama alanı gereklidir. Dil anahtarları içeren bir nesne olmalıdır: {prop}",
   "description_invalid": "Açıklama alanı geçersiz. Dil anahtarları içeren bir nesne olmalıdır: {prop}",

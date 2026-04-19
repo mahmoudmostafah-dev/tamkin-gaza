@@ -5,9 +5,7 @@ import { Repository } from 'typeorm';
 import { Campaign } from '../../DataBase/Campaign/campaign.model';
 import { ResponseService } from 'src/Common/Services/Response/response.service';
 import { CampaignDto } from './Dtos/campaign.dto';
-import { TranslationService } from 'src/Common/Services/Translation/translation.service';
-import { LanguageCode } from 'src/Common/Interfaces/Language/languages-config.interface';
-import { createSlug } from 'src/Common/Utils/Slug/slug.utils';
+import { createSlug } from 'src/Common/Utils/Slug/slug';
 import type { IRequest } from 'src/Common/Types/request.types';
 import { REQUEST } from '@nestjs/core';
 
@@ -17,7 +15,6 @@ export class CampaignService {
     @InjectRepository(Campaign)
     private readonly campaignRepository: Repository<Campaign>,
     private readonly responseService: ResponseService,
-    private readonly translationService: TranslationService,
     @Inject(REQUEST) private readonly request : IRequest
   ) {}
 
@@ -51,9 +48,7 @@ export class CampaignService {
 
     if (isCampaignExist)
       throw this.responseService.conflict({
-        message: await this.translationService.translate(
-          'campaign:errors.campaign_already_exist',
-        ),
+        message: 'campaign:errors.campaign_already_exist',
       });
 
     return await this.campaignRepository.create({

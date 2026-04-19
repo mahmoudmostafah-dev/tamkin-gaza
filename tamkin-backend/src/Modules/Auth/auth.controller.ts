@@ -5,6 +5,7 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
   UsePipes,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -12,8 +13,9 @@ import { GoogleLoginDto, LoginDto, RegisterDto } from './Dto/register.dto';
 import { ValidationPipe } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { ResponseService } from 'src/Common/Services/Response/response.service';
-import { TranslationService } from 'src/Common/Services/Translation/translation.service';
-import { ILanguageRequest } from 'src/Common/Interfaces/Language/language-request.interface';
+import type { IRequest } from 'src/Common/Types/request.types';
+import { AuthenticationGuard } from 'src/Common/Guards/authentication/authentication.guard';
+import { ConfirmEmailDto } from './Dto/confirm.email.dto';
 
 @UsePipes(
   new ValidationPipe({
@@ -27,12 +29,11 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly responseService: ResponseService,
-    private readonly translationService: TranslationService,
-  ) {}
+  ) { }
 
   @Post('google')
   async loginWithGoogle(
-    @Req() req: Request,
+    @Req() req: IRequest,
     @Res({ passthrough: true }) res: Response,
     @Body() body: GoogleLoginDto,
   ) {
@@ -41,22 +42,14 @@ export class AuthController {
       res,
       body,
     );
-    const userLang = (req as ILanguageRequest).userLanguage;
+    const userLang = req.userLanguage;
+
     return this.responseService.success({
       message:
         status === 'register'
-          ? this.translationService.translate(
-              'auth:success.registeredSuccessfully',
-              userLang,
-            )
-          : this.translationService.translate(
-              'auth:success.loggedSuccessfully',
-              userLang,
-            ),
-      info: this.translationService.translate(
-        'auth:success.credentialsSavedInCookiesSuccessfully',
-        userLang,
-      ),
+          ? 'auth:success.registered_successfully'
+          : 'auth:success.logged_successfully',
+      info: 'auth:success.credentials_saved_in_cookies_successfully',
       data: {
         user,
         status,
@@ -66,22 +59,16 @@ export class AuthController {
 
   @Post('register')
   async register(
-    @Req() req: Request,
+    @Req() req: IRequest,
     @Res({ passthrough: true }) res: Response,
     @Body() body: RegisterDto,
   ) {
     const { user } = await this.authService.register(req, res, body);
 
-    const userLang = (req as ILanguageRequest).userLanguage;
+    const userLang = req.userLanguage;
     return this.responseService.success({
-      message: this.translationService.translate(
-        'auth:success.registeredSuccessfully',
-        userLang,
-      ),
-      info: this.translationService.translate(
-        'auth:success.credentialsSavedInCookiesSuccessfully',
-        userLang,
-      ),
+      message: 'auth:success.registered_successfully',
+      info: 'auth:success.credentials_saved_in_cookies_successfully',
       data: {
         user,
       },
@@ -90,22 +77,16 @@ export class AuthController {
 
   @Post('login')
   async login(
-    @Req() req: Request,
+    @Req() req: IRequest,
     @Res({ passthrough: true }) res: Response,
     @Body() body: LoginDto,
   ) {
     const { user } = await this.authService.login(req, res, body);
 
-    const userLang = (req as ILanguageRequest).userLanguage;
+    const userLang = req.userLanguage;
     return this.responseService.success({
-      message: this.translationService.translate(
-        'auth:success.loggedSuccessfully',
-        userLang,
-      ),
-      info: this.translationService.translate(
-        'auth:success.credentialsSavedInCookiesSuccessfully',
-        userLang,
-      ),
+      message: 'auth:success.logged_successfully',
+      info: 'auth:success.credentials_saved_in_cookies_successfully',
       data: {
         user,
       },
@@ -113,15 +94,46 @@ export class AuthController {
   }
 
   @Post('logout')
-  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    await this.authService.logout(req, res);
+  async logout(@Req() req: IRequest, @Res({ passthrough: true }) res: Response) {
+    await this.authService.logout(req as unknown as Request, res);
 
-    const userLang = (req as ILanguageRequest).userLanguage;
+    const userLang = req.userLanguage;
     return this.responseService.success({
-      message: this.translationService.translate(
-        'auth:success.loggedOutSuccessfully',
-        userLang,
-      ),
+      message: 'auth:success.logged_out_successfully',
     });
   }
+
+
+  @UseGuards(AuthenticationGuard)
+  @Post('request-confirm-email')
+  async requestConfirmEmail(
+    @Req() req: IRequest,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    await this.authService.requestConfirmEmail(req, res);
+
+    return this.responseService.success({
+      message: 'auth:success.request_confirm_email',
+      info: 'auth:success.otp_sent_to_your_email_please_check_your_email_and_confirm_your_email',
+    });
+  }
+
+   @UseGuards(AuthenticationGuard)
+   @Post('confirm-email')
+   async confirmEmail(
+     @Req() req: IRequest,
+     @Body() body: ConfirmEmailDto,
+   ) {
+       await this.authService.confirmEmail(req, body);
+ 
+       return this.responseService.success({
+         message: 'auth:success.email_verified_successfully',
+         info: 'auth:success.email_verified_successfully_info',
+       });
+     } 
+
+
+
+
+
 }

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { UserRoleEnum } from 'src/Common/Enums/User/user.enum';
 import { ResponseService } from 'src/Common/Services/Response/response.service';
 import { TranslationService } from 'src/Common/Services/Translation/translation.service';
-import { ILanguageRequest } from 'src/Common/Interfaces/Language/language-request.interface';
+import { IRequest } from 'src/Common/Types/request.types';
 
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
@@ -12,7 +12,7 @@ export class AuthorizationGuard implements CanActivate {
     private readonly reflector: Reflector,
     private readonly responseService: ResponseService,
     private readonly translationService: TranslationService,
-  ) {}
+  ) { }
 
   canActivate(
     context: ExecutionContext,
@@ -38,16 +38,14 @@ export class AuthorizationGuard implements CanActivate {
     }
 
     if (!accessRoles.includes(role)) {
-      const userLang = (req as ILanguageRequest).userLanguage;
+      const userLang = (req as IRequest).userLanguage;
       throw this.responseService.unauthorized({
         message: this.translationService.translate(
           'auth:errors.unauthorized',
-          userLang,
-        ),
+          { prop: userLang }),
         info: this.translationService.translate(
           'auth:errors.unauthorized_info',
-          userLang,
-        ),
+          { prop: userLang }),
       });
     }
 

@@ -10,7 +10,7 @@ import {
 
 @Entity()
 export class JwtModel implements jwtInterface.IJwt {
-  type: TokenTypeEnum;
+  
   @PrimaryGeneratedColumn()
   _id: string;
 
@@ -24,7 +24,7 @@ export class JwtModel implements jwtInterface.IJwt {
   token: string;
 
   @Column()
-  typ: TokenTypeEnum;
+  type: TokenTypeEnum;
 
   @Column()
   expiresAt: Date;

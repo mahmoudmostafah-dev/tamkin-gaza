@@ -6,6 +6,7 @@ import {
   OSEnum,
 } from 'src/Common/Enums/Jwt/jwt.enum';
 import { ISession } from 'src/Common/Interfaces/Security/client-info.interface';
+import { IRequest } from 'src/Common/Types/request.types';
 
 import { UAParser } from 'ua-parser-js';
 
@@ -62,12 +63,12 @@ export class ClientInfoService {
     };
   }
 
-  getUserSessionContext(req: Request): ISession {
+  getUserSessionContext(req: Request | IRequest): ISession {
     const userAgent = req.headers['user-agent'] || 'unknown';
 
     const ipAddress =
       (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-      req.socket.remoteAddress ||
+      (req as Request).socket.remoteAddress ||
       'unknown';
 
     const deviceInfo = this.parseDeviceInfo(userAgent);

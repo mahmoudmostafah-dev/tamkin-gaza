@@ -1,9 +1,10 @@
 import {
   MiddlewareConsumer,
   Module,
-  NestModule,
   OnApplicationBootstrap,
 } from '@nestjs/common';
+import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -24,6 +25,10 @@ import { TranslationService } from './Common/Services/Translation/translation.se
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'assets', 'Images'),
+      serveRoot: '/pictures',
     }),
     TypeOrmModule.forRootAsync(TypeORMConfig),
     CommonModule,

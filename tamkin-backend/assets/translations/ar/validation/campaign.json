@@ -1,5 +1,5 @@
 {
-  "title_required": "حقل العنوان مطلوب",
+  "title_required": "عربي",
   "description_required": "حقل الوصف مطلوب",
   "title_invalid": "{prop} : حقل العنوان غير صحيح. يجب أن يكون كائنًا بمفاتيح اللغات",
   "description_invalid": "{prop} : حقل الوصف غير صحيح. يجب أن يكون كائنًا بمفاتيح اللغات",

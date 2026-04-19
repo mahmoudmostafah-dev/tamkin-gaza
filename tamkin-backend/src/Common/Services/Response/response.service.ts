@@ -6,22 +6,38 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  unauthorizedException,
+  Scope,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ExceptionOptions,
   IResponse,
 } from '../../Interfaces/Response/response.interface';
+import { TranslationService } from '../Translation/translation.service';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class ResponseService {
+  constructor(private readonly translationService: TranslationService) {}
+
+  private translateIfKey(text: string | any): string | any {
+    if (typeof text === 'string' && text.includes(':') && text.includes('.')) {
+      return this.translationService.translate(text);
+    }
+    return text;
+  }
+
   success<T = any>({
-    message = 'Operation successful',
+    message = 'common:common.operation_successful',
     info,
     statusCode = HttpStatus.OK,
     data,
   }: IResponse<T> = {}): IResponse<T> {
-    return { message, info, statusCode, data };
+    return {
+      message: this.translateIfKey(message),
+      info: this.translateIfKey(info),
+      statusCode,
+      data,
+    };
   }
 
   private createErrorPayload(
@@ -32,8 +48,8 @@ export class ResponseService {
     return {
       name,
       statusCode,
-      message: options.message || name,
-      info: options.info,
+      message: this.translateIfKey(options.message || name),
+      info: this.translateIfKey(options.info),
       issues: options.issues,
       timestamp: new Date().toISOString(),
     };
@@ -80,10 +96,10 @@ export class ResponseService {
   }
 
   unauthorized(options: ExceptionOptions = {}) {
-    throw new unauthorizedException(
+    throw new UnauthorizedException(
       this.createErrorPayload(
         'unauthorizedException',
-        HttpStatus.unauthorized,
+        HttpStatus.UNAUTHORIZED,
         options,
       ),
     );

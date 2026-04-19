@@ -1,10 +1,12 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
+import { ConfigService } from '@nestjs/config';
 import languagesConfig from '../../../Config/Language/language.json';
 
 @Injectable()
 export class JsonFileService implements OnModuleInit {
+  constructor(private readonly configService: ConfigService) {}
   private readonly cache: Record<string, any> = {};
   private readonly baseDir = path.join(
     __dirname,
@@ -58,7 +60,7 @@ export class JsonFileService implements OnModuleInit {
     }
   }
 
-  public get(lang: string, pathKey: string, context?: { prop?: any }): string {
+  public get(lang: string, pathKey: string, context?: { prop?: any }): any {
     try {
       if (!pathKey.includes(':')) return pathKey;
 
@@ -81,9 +83,7 @@ export class JsonFileService implements OnModuleInit {
         translation,
       );
 
-      if (typeof result !== 'string') return pathKey;
-
-      if (context?.prop) {
+      if (context?.prop && typeof result === 'string') {
         const propValue = Array.isArray(context.prop)
           ? context.prop.join(', ')
           : context.prop;
@@ -91,9 +91,33 @@ export class JsonFileService implements OnModuleInit {
         result = result.replace(/{prop}/g, propValue);
       }
 
-      return result;
+      return this.replaceBaseUrl(result);
     } catch {
       return pathKey;
     }
+  }
+
+  private replaceBaseUrl(data: any): any {
+    const baseUrl = this.configService.get<string>('BASE_URL') || '';
+
+    if (typeof data === 'string') {
+      return data.replace(/{{baseUrl}}/g, baseUrl);
+    }
+
+    if (Array.isArray(data)) {
+      return data.map((item) => this.replaceBaseUrl(item));
+    }
+
+    if (typeof data === 'object' && data !== null) {
+      const replacedObj: any = {};
+      for (const key in data) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
+          replacedObj[key] = this.replaceBaseUrl(data[key]);
+        }
+      }
+      return replacedObj;
+    }
+
+    return data;
   }
 }

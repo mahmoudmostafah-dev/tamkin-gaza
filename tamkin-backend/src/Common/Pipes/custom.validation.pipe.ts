@@ -3,12 +3,12 @@ import { ValidationPipe } from '@nestjs/common';
 import { ResponseService } from '../Services/Response/response.service';
 import { TranslationService } from '../Services/Translation/translation.service';
 import { REQUEST } from '@nestjs/core';
-import type { ILanguageRequest } from '../Interfaces/Language/language-request.interface';
+import type { IRequest } from '../Types/request.types';
 
 @Injectable({ scope: Scope.REQUEST })
 export class CustomValidationPipe extends ValidationPipe {
   constructor(
-    @Inject(REQUEST) private readonly request: ILanguageRequest,
+    @Inject(REQUEST) private readonly request: IRequest,
     private readonly translationService: TranslationService,
     private readonly responseService: ResponseService,
   ) {
@@ -40,15 +40,13 @@ export class CustomValidationPipe extends ValidationPipe {
 
             const message = this.translationService.translate(
               translationKey,
-              userLanguage,
-              { prop },
+              { prop: userLanguage },
             );
             translatedMessages.push(message);
           } else {
             const message = this.translationService.translate(
               key,
-              userLanguage,
-            );
+              { prop: userLanguage },);
             translatedMessages.push(message);
           }
         }
@@ -62,7 +60,7 @@ export class CustomValidationPipe extends ValidationPipe {
       };
     });
     return this.responseService.badRequest({
-      message: 'Validation failed',
+      message: 'common:common.validation_failed',
       issues: formattedErrors,
     });
   }

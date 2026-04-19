@@ -2,13 +2,13 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Response, NextFunction } from 'express';
 import { LanguageCode } from 'src/Common/Interfaces/Language/languages-config.interface';
 import languagesConfig from '../Config/Language/language.json';
-import { ILanguageRequest } from 'src/Common/Interfaces/Language/language-request.interface';
 import { TranslationService } from 'src/Common/Services/Translation/translation.service';
+import { IRequest } from 'src/Common/Types/request.types';
 
 @Injectable()
 export class LanguageMiddleware implements NestMiddleware {
   constructor(private translationService: TranslationService) {}
-  use(req: ILanguageRequest, res: Response, next: NextFunction) {
+  use(req: IRequest, res: Response, next: NextFunction) {
     const header = req.headers['accept-language'] || '';
 
     const requestedLang = header.split(',')[0].split('-')[0].toLowerCase();

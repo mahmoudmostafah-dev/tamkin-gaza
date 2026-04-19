@@ -1,5 +1,5 @@
 {
-  "title_required": "Title field is required. Must be an object with language keys: {prop}",
+  "title_required": "انجليزي",
   "title_invalid": "Title field is invalid. Must be an object with language keys: {prop}",
   "description_required": "Description field is required. Must be an object with language keys: {prop}",
   "description_invalid": "Description field is invalid. Must be an object with language keys: {prop}",

@@ -12,12 +12,12 @@ export class TranslationService {
     @Inject(REQUEST) private readonly request: IRequest,
   ) {}
 
-  public translate(key: string, context?: { prop?: any }): string {
+  public translate(key: string, context?: { prop?: any }): any {
     const userLanguage = this.request.userLanguage;
     return this.jsonFileProvider.get(userLanguage, key, context);
   }
 
-  public translateToDefaultLanguage(key: string, context?: { prop?: any }): string {
+  public translateToDefaultLanguage(key: string, context?: { prop?: any }): any {
     const defaultLanguageCode = this.getDefaultLanguageCode();
     return this.jsonFileProvider.get(defaultLanguageCode, key, context);
   }

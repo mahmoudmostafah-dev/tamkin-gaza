@@ -3,8 +3,8 @@ import { PickType } from '@nestjs/mapped-types';
 import { UserValidators } from 'src/Common/Validators/user.validate';
 
 export class GoogleLoginDto {
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: 'validation:global.is_string' })
+  @IsNotEmpty({ message: 'validation:global.is_not_empty' })
   id_token: string;
 }
 

@@ -16,36 +16,36 @@ import { IsLanguageRecord } from 'src/Common/Decorators/Language/isLanguageRecor
 
 export class CampaignDto {
   @IsDefined({
-    message: `campaign:validation.title_required`,
+    message: `validation:campaign.title_required`,
   })
   @IsLanguageRecord({
-    message: `campaign:validation.title_invalid|${SUPPORTED_LANGUAGES}`,
+    message: `validation:campaign.title_invalid|${SUPPORTED_LANGUAGES}`,
   })
   title: Record<LanguageCode, string>;
 
   @IsDefined({
-    message: `campaign:validation.description_required`,
+    message: `validation:campaign.description_required`,
   })
   @IsLanguageRecord({
-    message: `campaign:validation.description_invalid|${SUPPORTED_LANGUAGES}`,
+    message: `validation:campaign.description_invalid|${SUPPORTED_LANGUAGES}`,
   })
   description: Record<LanguageCode[number], string>;
 
   @IsDefined({
-    message: `campaign:validation.target_amount_required`,
+    message: `validation:campaign.target_amount_required`,
   })
   @IsNumber(
     { maxDecimalPlaces: 2 },
-    { message: `campaign:validation.target_amount_invalid` },
+    { message: `validation:campaign.target_amount_invalid` },
   )
-  @Min(1, { message: 'campaign:validation.target_amount_min' })
+  @Min(1, { message: 'validation:campaign.target_amount_min' })
   target_amount: number;
 
-  @IsString({ message: 'campaign:validation.image_invalid' })
+  @IsString({ message: 'validation:campaign.image_invalid' })
   @IsOptional()
   image: string;
 
-  @IsEnum(CampaignStatusEnum, { message: 'campaign:validation.status_invalid' })
+  @IsEnum(CampaignStatusEnum, { message: 'validation:campaign.status_invalid' })
   @IsOptional()
   status: CampaignStatusEnum;
 }
