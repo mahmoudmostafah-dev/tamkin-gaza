@@ -57,8 +57,8 @@ export class AuthService {
 
       if (!newUser) {
         throw this.responseService.serverError({
-          message: 'auth:errors.fail_to_create_user',
-          info: 'auth:errors.something_went_wrong_please_try_again',
+          message: 'auth.errors.fail_to_create_user',
+          info: 'auth.errors.something_went_wrong_please_try_again',
         });
       }
 
@@ -103,14 +103,14 @@ export class AuthService {
 
     if (user) {
       throw this.responseService.badRequest({
-        message: 'auth:errors.email_already_exists',
-        info: 'auth:errors.this_account_is_already_registered_please_login',
+        message: 'auth.errors.email_already_exists',
+        info: 'auth.errors.this_account_is_already_registered_please_login',
       });
     }
 
     if (body.password !== body.confirmPassword) {
       throw this.responseService.badRequest({
-        message: 'validation:user.passwords_not_match',
+        message: 'validation.user.passwords_not_match',
       });
     }
 
@@ -126,8 +126,8 @@ export class AuthService {
 
     if (!newUser) {
       throw this.responseService.serverError({
-        message: 'auth:errors.fail_to_create_user',
-        info: 'auth:errors.something_went_wrong_please_try_again',
+        message: 'auth.errors.fail_to_create_user',
+        info: 'auth.errors.something_went_wrong_please_try_again',
       });
     }
 
@@ -168,15 +168,15 @@ export class AuthService {
 
     if (!user || !user.password) {
       throw this.responseService.badRequest({
-        message: 'auth:errors.invalid_credentials',
-        info: 'auth:errors.invalid_credentials_info',
+        message: 'auth.errors.invalid_credentials',
+        info: 'auth.errors.invalid_credentials_info',
       });
     }
 
     if (!(await this.hashingService.compareHash({ plainText: body.password, hashText: user.password }))) {
       throw this.responseService.badRequest({
-        message: 'auth:errors.invalid_credentials',
-        info: 'auth:errors.invalid_credentials_info',
+        message: 'auth.errors.invalid_credentials',
+        info: 'auth.errors.invalid_credentials_info',
       });
     }
 
@@ -224,8 +224,8 @@ export class AuthService {
 
     if (req.user?.emailVerified) {
       throw this.responseService.badRequest({
-        message: 'auth:errors.email_already_verified',
-        info: 'auth:errors.email_already_verified_info'
+        message: 'auth.errors.email_already_verified',
+        info: 'auth.errors.email_already_verified_info'
       });
     }
 
@@ -239,8 +239,8 @@ export class AuthService {
 
     if (!result) {
       throw this.responseService.badRequest({
-        message: 'auth:errors.fail_to_send_otp',
-        info: 'auth:errors.fail_to_send_otp_info'
+        message: 'auth.errors.fail_to_send_otp',
+        info: 'auth.errors.fail_to_send_otp_info'
       });
     }
 
@@ -250,8 +250,8 @@ export class AuthService {
 
     if (req.user?.emailVerified) {
       throw this.responseService.badRequest({
-        message: 'email:errors.email_already_verified',
-        info: 'email:errors.email_already_verified_info'
+        message: 'email.errors.email_already_verified',
+        info: 'email.errors.email_already_verified_info'
       });
     }
 
@@ -263,8 +263,8 @@ export class AuthService {
 
     if (!result) {
       throw this.responseService.badRequest({
-        message: 'email:errors.otp_invalid',
-        info: 'email:errors.otp_invalid_info'
+        message: 'email.errors.otp_invalid',
+        info: 'email.errors.otp_invalid_info'
       });
     }
 

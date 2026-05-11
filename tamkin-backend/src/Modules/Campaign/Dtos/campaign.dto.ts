@@ -17,39 +17,39 @@ import { IsLanguageRecord } from 'src/Common/Decorators/Language/isLanguageRecor
 
 export class CampaignDto {
   @IsDefined({
-    message: `validation:campaign.title_required`,
+    message: `validation.campaign.title_required`,
   })
   @IsLanguageRecord({
-    message: `validation:campaign.title_invalid|${SUPPORTED_LANGUAGES}`,
+    message: `validation.campaign.title_invalid|${SUPPORTED_LANGUAGES}`,
   })
   title: Record<LanguageCode, string>;
 
   @IsDefined({
-    message: `validation:campaign.description_required`,
+    message: `validation.campaign.description_required`,
   })
   @IsLanguageRecord({
-    message: `validation:campaign.description_invalid|${SUPPORTED_LANGUAGES}`,
+    message: `validation.campaign.description_invalid|${SUPPORTED_LANGUAGES}`,
   })
   description: Record<LanguageCode[number], string>;
 
   @IsDefined({
-    message: `validation:campaign.target_amount_required`,
+    message: `validation.campaign.target_amount_required`,
   })
-  @IsNumber({ maxDecimalPlaces: 2 }, { message: `validation:campaign.target_amount_invalid` })
-  @Min(1, { message: 'validation:campaign.target_amount_min' })
+  @IsNumber({ maxDecimalPlaces: 2 }, { message: `validation.campaign.target_amount_invalid` })
+  @Min(1, { message: 'validation.campaign.target_amount_min' })
   target_amount: number;
 
   @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 }, { message: `validation:campaign.current_amount_invalid` })
-  @Min(0, { message: 'validation:campaign.current_amount_min' })
+  @IsNumber({ maxDecimalPlaces: 2 }, { message: `validation.campaign.current_amount_invalid` })
+  @Min(0, { message: 'validation.campaign.current_amount_min' })
   current_amount: number;
 
-  @IsArray({ message: 'validation:campaign.image_invalid' })
-  @IsString({ each: true, message: 'validation:campaign.image_invalid' })
+  @IsArray({ message: 'validation.campaign.image_invalid' })
+  @IsString({ each: true, message: 'validation.campaign.image_invalid' })
   @IsOptional()
   image: string[];
 
-  @IsEnum(CampaignStatusEnum, { message: 'validation:campaign.status_invalid' })
+  @IsEnum(CampaignStatusEnum, { message: 'validation.campaign.status_invalid' })
   @IsOptional()
   status: CampaignStatusEnum;
 }

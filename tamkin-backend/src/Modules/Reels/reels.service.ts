@@ -62,7 +62,7 @@ export class ReelsService {
       relations: ['user'],
     });
     if (!reel) {
-      this.responseService.notFound({ message: 'reels:errors.not_found' });
+      this.responseService.notFound({ message: 'reels.errors.not_found' });
     }
     return reel!;
   }
@@ -96,11 +96,11 @@ export class ReelsService {
     const reel = await this.reelRepository.findOne({ where: { uuid: reelId }, relations: ['user'] });
 
     if (!reel) {
-      this.responseService.notFound({ message: 'reels:errors.not_found' });
+      this.responseService.notFound({ message: 'reels.errors.not_found' });
     }
 
     if (reel!.user?.uuid !== user.uuid && user.role !== UserRoleEnum.SUPER_ADMIN && user.role !== UserRoleEnum.ADMIN) {
-      this.responseService.forbidden({ message: 'reels:errors.forbidden' });
+      this.responseService.forbidden({ message: 'reels.errors.forbidden' });
     }
 
     if (dto.title !== undefined) reel!.title = dto.title;
@@ -148,12 +148,12 @@ export class ReelsService {
     const reel = await this.reelRepository.findOne({ where: { uuid: reelId }, relations: ['user'] });
 
     if (!reel) {
-      this.responseService.notFound({ message: 'reels:errors.not_found' });
+      this.responseService.notFound({ message: 'reels.errors.not_found' });
       return;
     }
 
     if (reel.user?.uuid !== user.uuid && user.role !== UserRoleEnum.SUPER_ADMIN && user.role !== UserRoleEnum.ADMIN) {
-      this.responseService.forbidden({ message: 'reels:errors.forbidden' });
+      this.responseService.forbidden({ message: 'reels.errors.forbidden' });
       return;
     }
 

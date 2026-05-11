@@ -35,7 +35,7 @@ export class ReelsController {
       limits: { fileSize: 100 * 1024 * 1024 },
       fileFilter: (req, file, cb) => {
         if (!file.mimetype.match(/^video\/(mp4|mkv|webm|avi|quicktime|x-m4v)$/)) {
-          return cb(new Error('reels:errors.invalid_file_type'), false);
+          return cb(new Error('reels.errors.invalid_file_type'), false);
         }
         cb(null, true);
       },
@@ -55,7 +55,7 @@ export class ReelsController {
       dto
     );
     return this.responseService.success({
-      message: 'reels:success.uploaded_successfully',
+      message: 'reels.success.uploaded_successfully',
       data: reel,
     });
   }
@@ -64,7 +64,7 @@ export class ReelsController {
   async searchReels(@Query() query: SearchReelsDto) {
     const data = await this.reelsService.searchReels(query);
     return this.responseService.success({
-      message: 'reels:success.fetched_successfully',
+      message: 'reels.success.fetched_successfully',
       data,
     });
   }
@@ -73,7 +73,7 @@ export class ReelsController {
   async getReelsByUserId(@Param('userId', ParseUUIDPipe) userId: string, @Query() query: PaginationDto) {
     const data = await this.reelsService.getReelsByUserId(userId, query);
     return this.responseService.success({
-      message: 'reels:success.fetched_successfully',
+      message: 'reels.success.fetched_successfully',
       data,
     });
   }
@@ -82,7 +82,7 @@ export class ReelsController {
   async getReelById(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.reelsService.getReelById(id);
     return this.responseService.success({
-      message: 'reels:success.fetched_successfully',
+      message: 'reels.success.fetched_successfully',
       data,
     });
   }
@@ -91,7 +91,7 @@ export class ReelsController {
   async getAllReels(@Query() query: PaginationDto) {
     const data = await this.reelsService.getAllReels(query);
     return this.responseService.success({
-      message: 'reels:success.fetched_successfully',
+      message: 'reels.success.fetched_successfully',
       data,
     });
   }
@@ -101,7 +101,7 @@ export class ReelsController {
   async updateReel(@Req() req: IRequest, @Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateReelDto) {
     const data = await this.reelsService.updateReel(id, dto, req.user!);
     return this.responseService.success({
-      message: 'reels:success.updated_successfully',
+      message: 'reels.success.updated_successfully',
       data,
     });
   }
@@ -112,7 +112,7 @@ export class ReelsController {
   async deleteReel(@Req() req: IRequest, @Param('id', ParseUUIDPipe) id: string) {
     await this.reelsService.deleteReel(id, req.user!);
     return this.responseService.success({
-      message: 'reels:success.deleted_successfully',
+      message: 'reels.success.deleted_successfully',
     });
   }
 

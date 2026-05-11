@@ -60,7 +60,7 @@ export class TokenService {
 
     if (!key) {
       throw this.responseService.serverError({
-        message: 'token:errors.secret_key_missing',
+        message: 'token.errors.secret_key_missing',
       });
     }
 
@@ -171,7 +171,7 @@ export class TokenService {
       return jwt.verify(token, secretKey) as IDecoded;
     } catch (error: any) {
       throw this.responseService.unauthorized({
-        message: 'auth:errors.token_validation_failed',
+        message: 'auth.errors.token_validation_failed',
         info: error.message,
       });
     }
@@ -235,20 +235,20 @@ export class TokenService {
     } catch (error: any) {
       if (error.name === 'TokenExpiredError') {
         throw this.responseService.unauthorized({
-          message: 'token:errors.token_validation_failed',
-          info: 'token:errors.token_expired',
+          message: 'token.errors.token_validation_failed',
+          info: 'token.errors.token_expired',
         });
       }
 
       if (error.name === 'JsonWebTokenError') {
         throw this.responseService.unauthorized({
-          message: 'token:errors.token_validation_failed',
-          info: 'auth:errors.token_validation_failed',
+          message: 'token.errors.token_validation_failed',
+          info: 'auth.errors.token_validation_failed',
         });
       }
 
       throw this.responseService.unauthorized({
-        message: 'token:errors.token_validation_failed',
+        message: 'token.errors.token_validation_failed',
         info: error.message,
       });
     }
@@ -272,8 +272,8 @@ export class TokenService {
 
     if (!user) {
       throw this.responseService.unauthorized({
-        message: 'token:errors.user_account_not_found',
-        info: 'token:errors.the_associated_account_could_not_be_located',
+        message: 'token.errors.user_account_not_found',
+        info: 'token.errors.the_associated_account_could_not_be_located',
       });
     }
 
@@ -282,43 +282,43 @@ export class TokenService {
       adminSetting.changeCredentialsTime > new Date(decoded.iat * 1000)
     ) {
       throw this.responseService.unauthorized({
-        message: 'token:errors.token_invalidated_by_recent_credential_change',
-        info: 'token:errors.your_password_or_account_settings_have_been_updated_please_log_in_again',
+        message: 'token.errors.token_invalidated_by_recent_credential_change',
+        info: 'token.errors.your_password_or_account_settings_have_been_updated_please_log_in_again',
       });
     }
 
     if (!jwt) {
       throw this.responseService.unauthorized({
-        message: 'token:errors.invalid_or_revoked_session',
-        info: 'token:errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
+        message: 'token.errors.invalid_or_revoked_session',
+        info: 'token.errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
       });
     }
 
     if (jwt.type !== type) {
       throw this.responseService.unauthorized({
-        message: 'token:errors.invalid_token_type',
-        info: 'token:errors.the_provided_token_does_not_match_the_required_token_type',
+        message: 'token.errors.invalid_token_type',
+        info: 'token.errors.the_provided_token_does_not_match_the_required_token_type',
       });
     }
 
     if (jwt.revoked) {
       throw this.responseService.unauthorized({
-        message: 'token:errors.session_expired_please_log_in_again',
-        info: 'token:errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
+        message: 'token.errors.session_expired_please_log_in_again',
+        info: 'token.errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
       });
     }
 
     if (jwt.expiresAt < new Date()) {
       if (jwt.type === TokenTypeEnum.REFRESH) {
         throw this.responseService.unauthorized({
-          message: 'token:errors.refresh_token_has_expired',
-          info: 'token:errors.your_session_has_timed_out_please_log_in_again',
+          message: 'token.errors.refresh_token_has_expired',
+          info: 'token.errors.your_session_has_timed_out_please_log_in_again',
         });
       }
 
       throw this.responseService.unauthorized({
-        message: 'token:errors.access_token_has_expired',
-        info: 'token:errors.your_access_token_has_timed_out_please_refresh_your_session',
+        message: 'token.errors.access_token_has_expired',
+        info: 'token.errors.your_access_token_has_timed_out_please_refresh_your_session',
       });
     }
 
@@ -336,8 +336,8 @@ export class TokenService {
             })
        */
       throw this.responseService.unauthorized({
-        message: 'token:errors.session_expired_please_log_in_again',
-        info: 'token:errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
+        message: 'token.errors.session_expired_please_log_in_again',
+        info: 'token.errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
       });
     }
 

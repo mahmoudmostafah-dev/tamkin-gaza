@@ -33,9 +33,9 @@ export class AuthController {
     return this.responseService.success({
       message:
         status === 'register'
-          ? 'auth:success.registered_successfully'
-          : 'auth:success.logged_successfully',
-      info: 'auth:success.credentials_saved_in_cookies_successfully',
+          ? 'auth.success.registered_successfully'
+          : 'auth.success.logged_successfully',
+      info: 'auth.success.credentials_saved_in_cookies_successfully',
       data: {
         user,
         status,
@@ -52,8 +52,8 @@ export class AuthController {
     const { user } = await this.authService.register(req, res, body);
 
     return this.responseService.success({
-      message: 'auth:success.registered_successfully',
-      info: 'auth:success.credentials_saved_in_cookies_successfully',
+      message: 'auth.success.registered_successfully',
+      info: 'auth.success.credentials_saved_in_cookies_successfully',
       data: {
         user,
       },
@@ -69,8 +69,8 @@ export class AuthController {
     const { user } = await this.authService.login(req, res, body);
 
     return this.responseService.success({
-      message: 'auth:success.logged_successfully',
-      info: 'auth:success.credentials_saved_in_cookies_successfully',
+      message: 'auth.success.logged_successfully',
+      info: 'auth.success.credentials_saved_in_cookies_successfully',
       data: {
         user,
       },
@@ -82,7 +82,7 @@ export class AuthController {
     await this.authService.logout(req as unknown as Request, res);
 
     return this.responseService.success({
-      message: 'auth:success.logged_out_successfully',
+      message: 'auth.success.logged_out_successfully',
     });
   }
 
@@ -92,8 +92,8 @@ export class AuthController {
     await this.authService.requestConfirmEmail(req, res);
 
     return this.responseService.success({
-      message: 'auth:success.request_confirm_email',
-      info: 'auth:success.otp_sent_to_your_email_please_check_your_email_and_confirm_your_email',
+      message: 'auth.success.request_confirm_email',
+      info: 'auth.success.otp_sent_to_your_email_please_check_your_email_and_confirm_your_email',
     });
   }
 
@@ -103,8 +103,8 @@ export class AuthController {
     await this.authService.confirmEmail(req, body);
 
     return this.responseService.success({
-      message: 'auth:success.email_verified_successfully',
-      info: 'auth:success.email_verified_successfully_info',
+      message: 'auth.success.email_verified_successfully',
+      info: 'auth.success.email_verified_successfully_info',
     });
   }
 }

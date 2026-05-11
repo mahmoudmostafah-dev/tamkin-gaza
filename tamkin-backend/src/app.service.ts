@@ -12,7 +12,7 @@ export class AppService {
   ){}
 
   main(req: Request) {
-    const data = this.translationService.translate('main:main.data');
+    const data = this.translationService.translate('main.main.data');
     return this.responseService.success({
       data: {
         ...data,

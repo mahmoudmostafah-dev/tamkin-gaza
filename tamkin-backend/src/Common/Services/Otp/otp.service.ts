@@ -56,16 +56,16 @@ export class OTPService {
       // 1. لو لسه blocked
       if (requestExists.blockedUntil && requestExists.blockedUntil.getTime() > Date.now()) {
         throw this.responseService.badRequest({
-          message: this.translationService.translate('auth:errors.confirm_email_otp_blocked'),
-          info: this.translationService.translate('auth:errors.confirm_email_otp_blocked_info'),
+          message: this.translationService.translate('auth.errors.confirm_email_otp_blocked'),
+          info: this.translationService.translate('auth.errors.confirm_email_otp_blocked_info'),
         });
       }
 
       // 2. limit
       if (requestExists.resendCount >= 3) {
         throw this.responseService.badRequest({
-          message: this.translationService.translate('auth:errors.otp_too_many_requests'),
-          info: this.translationService.translate('auth:errors.otp_too_many_requests_info'),
+          message: this.translationService.translate('auth.errors.otp_too_many_requests'),
+          info: this.translationService.translate('auth.errors.otp_too_many_requests_info'),
         });
       }
 
@@ -116,8 +116,8 @@ export class OTPService {
       await this.otpRepository.delete(newOtp);
 
       throw this.responseService.serverError({
-        message: this.translationService.translate('email:errors.fail_to_send_email'),
-        info: this.translationService.translate('email:errors.fail_to_send_email_info'),
+        message: this.translationService.translate('email.errors.fail_to_send_email'),
+        info: this.translationService.translate('email.errors.fail_to_send_email_info'),
       });
     }
 
@@ -129,8 +129,8 @@ export class OTPService {
 
     if (!otp) {
       throw this.responseService.badRequest({
-        message: this.translationService.translate('auth:errors.otp_invalid'),
-        info: this.translationService.translate('auth:errors.otp_invalid_info'),
+        message: this.translationService.translate('auth.errors.otp_invalid'),
+        info: this.translationService.translate('auth.errors.otp_invalid_info'),
       });
     }
 
@@ -141,8 +141,8 @@ export class OTPService {
 
     if (!isCodeValid) {
       throw this.responseService.badRequest({
-        message: this.translationService.translate('auth:errors.otp_invalid'),
-        info: this.translationService.translate('auth:errors.otp_invalid_info'),
+        message: this.translationService.translate('auth.errors.otp_invalid'),
+        info: this.translationService.translate('auth.errors.otp_invalid_info'),
       });
     }
 

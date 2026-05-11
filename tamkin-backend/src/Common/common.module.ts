@@ -7,7 +7,6 @@ import { ResponseService } from './Services/Response/response.service';
 import { TokenService } from './Services/Security/token.service';
 import { HashingService } from './Services/Security/Hash/hash.service';
 import { TranslationService } from './Services/Translation/translation.service';
-import { JsonFileService } from './Services/Json/json-file.service';
 import { EmailService } from './Services/Email/email.service';
 import { OTPService } from './Services/Otp/otp.service';
 import { OtpModel } from 'src/DataBase/Models/otp.model';
@@ -21,7 +20,6 @@ import { MailModel } from 'src/DataBase/Models/mail.model';
     TokenService,
     HashingService,
     TranslationService,
-    JsonFileService,
     EmailService,
     OTPService,
   ],
@@ -32,7 +30,6 @@ import { MailModel } from 'src/DataBase/Models/mail.model';
     TokenService,
     HashingService,
     TranslationService,
-    JsonFileService,
     EmailService,
     OTPService,
   ],

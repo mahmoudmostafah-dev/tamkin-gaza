@@ -46,7 +46,7 @@ export class CampaignService {
     const campaign = await this.findByUuid(campaignUuid);
     const userLanguage = this.request.userLanguage;
     if (!campaign || campaign.status === CampaignStatusEnum.DRAFT)
-      throw this.responseService.notFound({ message: 'campaign:errors.campaign_not_found' });
+      throw this.responseService.notFound({ message: 'campaign.errors.campaign_not_found' });
 
     return {
       ...campaign,
@@ -73,7 +73,7 @@ export class CampaignService {
 
     if (isCampaignExist)
       throw this.responseService.conflict({
-        message: 'campaign:errors.campaign_already_exist',
+        message: 'campaign.errors.campaign_already_exist',
       });
 
     const imageUrls: string[] = [];
@@ -104,7 +104,7 @@ export class CampaignService {
 
     if (!campaign)
       throw this.responseService.notFound({
-        message: 'campaign:errors.campaign_not_found',
+        message: 'campaign.errors.campaign_not_found',
       });
 
     const updateData: Partial<Campaign> = { ...updateCampaignDto };
@@ -131,7 +131,7 @@ export class CampaignService {
 
     if (!campaign)
       throw this.responseService.notFound({
-        message: 'campaign:errors.campaign_not_found',
+        message: 'campaign.errors.campaign_not_found',
       });
 
     await this.campaignRepository.softDelete({ uuid: campaign.uuid });
@@ -145,12 +145,12 @@ export class CampaignService {
 
     if (!campaign)
       throw this.responseService.notFound({
-        message: 'campaign:errors.campaign_not_found',
+        message: 'campaign.errors.campaign_not_found',
       });
 
     if (!campaign.deleted_at)
       throw this.responseService.conflict({
-        message: 'campaign:errors.campaign_not_deleted',
+        message: 'campaign.errors.campaign_not_deleted',
       });
 
     await this.campaignRepository.restore({ uuid: campaign.uuid });
@@ -163,12 +163,12 @@ export class CampaignService {
 
     if (!campaign)
       throw this.responseService.notFound({
-        message: 'campaign:errors.campaign_not_found',
+        message: 'campaign.errors.campaign_not_found',
       });
 
     if (campaign.status !== CampaignStatusEnum.DRAFT)
       throw this.responseService.conflict({
-        message: 'campaign:errors.campaign_not_in_draft_status',
+        message: 'campaign.errors.campaign_not_in_draft_status',
       });
 
     await this.campaignRepository.update(

@@ -45,8 +45,8 @@ export class EmailService {
       transporter = getTransporter();
     } catch {
       throw this.error.serverError({
-        message: this.translationService.translate('email:errors.email_config_missing'),
-        info: this.translationService.translate('email:errors.email_config_missing_info'),
+        message: this.translationService.translate('email.errors.email_config_missing'),
+        info: this.translationService.translate('email.errors.email_config_missing_info'),
       });
     }
 
@@ -67,8 +67,8 @@ export class EmailService {
       return await this.emailRepository.save(newEmail);
     } catch (sendError: any) {
       throw this.error.serverError({
-        message: this.translationService.translate('email:errors.fail_to_send_email'),
-        info: this.translationService.translate('email:errors.fail_to_send_email_info'),
+        message: this.translationService.translate('email.errors.fail_to_send_email'),
+        info: this.translationService.translate('email.errors.fail_to_send_email_info'),
       });
     }
   }

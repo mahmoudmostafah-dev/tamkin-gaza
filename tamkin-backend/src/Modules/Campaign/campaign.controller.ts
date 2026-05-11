@@ -46,7 +46,7 @@ export class CampaignController {
     const campaign = await this.campaignService.create(createCampaignDto, files);
     return this.responseService.success({
       statusCode: HttpStatus.CREATED,
-      message: 'campaign:success.campaign_created_successfully',
+      message: 'campaign.success.campaign_created_successfully',
       data: campaign,
     });
   }
@@ -70,7 +70,7 @@ export class CampaignController {
     const campaign = await this.campaignService.update(updateCampaignDto, campaignUuid, files);
     return this.responseService.success({
       statusCode: HttpStatus.OK,
-      message: 'campaign:success.campaign_updated_successfully',
+      message: 'campaign.success.campaign_updated_successfully',
       data: campaign,
     });
   }
@@ -81,7 +81,7 @@ export class CampaignController {
     await this.campaignService.delete(campaignUuid);
     return this.responseService.success({
       statusCode: HttpStatus.OK,
-      message: 'campaign:success.campaign_deleted_successfully',
+      message: 'campaign.success.campaign_deleted_successfully',
     });
   }
 
@@ -91,7 +91,7 @@ export class CampaignController {
     const campaign = await this.campaignService.restore(campaignUuid);
     return this.responseService.success({
       statusCode: HttpStatus.OK,
-      message: 'campaign:success.campaign_restored_successfully',
+      message: 'campaign.success.campaign_restored_successfully',
       data: campaign,
     });
   }
@@ -102,7 +102,7 @@ export class CampaignController {
     const campaign = await this.campaignService.approve(campaignUuid);
     return this.responseService.success({
       statusCode: HttpStatus.OK,
-      message: 'campaign:success.campaign_approved_successfully',
+      message: 'campaign.success.campaign_approved_successfully',
       data: campaign,
     });
   }

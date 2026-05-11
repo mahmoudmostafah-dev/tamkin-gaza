@@ -80,7 +80,7 @@ export class MinioService implements OnModuleInit {
 
 
     if (!file) {
-      this.responseService.badRequest({ message: 'reels:errors.invalid_file_type' });
+      this.responseService.badRequest({ message: 'reels.errors.invalid_file_type' });
     }
 
     const ext = file.originalname.split('.').pop();
