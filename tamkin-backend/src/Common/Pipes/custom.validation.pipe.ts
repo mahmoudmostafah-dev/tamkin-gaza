@@ -3,12 +3,14 @@ import { ValidationPipe } from '@nestjs/common';
 import { ResponseService } from '../Services/Response/response.service';
 import { TranslationService } from '../Services/Translation/translation.service';
 import { REQUEST } from '@nestjs/core';
-import type { ILanguageRequest } from '../Interfaces/Language/language-request.interface';
+import type { IRequest } from '../Types/request.types';
+
+const KNOWN_MODULES = ['auth', 'campaign', 'common', 'email', 'main', 'reels', 'token', 'validation'];
 
 @Injectable({ scope: Scope.REQUEST })
 export class CustomValidationPipe extends ValidationPipe {
   constructor(
-    @Inject(REQUEST) private readonly request: ILanguageRequest,
+    @Inject(REQUEST) private readonly request: IRequest,
     private readonly translationService: TranslationService,
     private readonly responseService: ResponseService,
   ) {
@@ -26,21 +28,41 @@ export class CustomValidationPipe extends ValidationPipe {
     const formattedErrors = errors.map((error) => {
       const constraints = Object.values(error.constraints || {});
 
-      const translatedMessages = constraints.map((key) => {
-        if (key.includes(':') && key.includes('.')) {
-          return this.translationService.translate(key, userLanguage);
+      const translatedMessages: string[] = [];
+
+      constraints.forEach((key) => {
+        // check if the key is one of OUR keys (starts with module.file.key)
+        const isCustomKey = KNOWN_MODULES.some((m) => key.startsWith(m + '.'));
+
+        if (isCustomKey) {
+          if (key.includes('|')) {
+            const [translationKey, ...rest] = key.split('|');
+            const propStr = rest.join('|');
+            const prop = propStr.split(',').map((item) => item.trim());
+
+            const message = this.translationService.translate(
+              translationKey,
+              { prop: userLanguage },
+            );
+            translatedMessages.push(message);
+          } else {
+            const message = this.translationService.translate(
+              key,
+              { prop: userLanguage },);
+            translatedMessages.push(message);
+          }
         }
-        return key;
+        // IMPORTANT: Do not add an 'else' block here.
+        // If it's not a custom key, we ignore it completely.
       });
 
       return {
         path: error.property,
-        info: translatedMessages.join(', '),
+        error: translatedMessages,
       };
     });
-
     return this.responseService.badRequest({
-      message: 'Validation failed',
+      message: 'common.common.validation_failed',
       issues: formattedErrors,
     });
   }

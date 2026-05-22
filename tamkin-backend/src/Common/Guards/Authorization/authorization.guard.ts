@@ -3,13 +3,16 @@ import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { UserRoleEnum } from 'src/Common/Enums/User/user.enum';
 import { ResponseService } from 'src/Common/Services/Response/response.service';
+import { TranslationService } from 'src/Common/Services/Translation/translation.service';
+import { IRequest } from 'src/Common/Types/request.types';
 
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly responseService: ResponseService,
-  ) {}
+    private readonly translationService: TranslationService,
+  ) { }
 
   canActivate(
     context: ExecutionContext,
@@ -35,9 +38,14 @@ export class AuthorizationGuard implements CanActivate {
     }
 
     if (!accessRoles.includes(role)) {
+      const userLang = (req as IRequest).userLanguage;
       throw this.responseService.unauthorized({
-        message: req.t('auth:errors.unAuthorized'),
-        info: req.t('auth:errors.unAuthorizedInfo'),
+        message: this.translationService.translate(
+          'auth.errors.unauthorized',
+          { prop: userLang }),
+        info: this.translationService.translate(
+          'auth.errors.unauthorized_info',
+          { prop: userLang }),
       });
     }
 

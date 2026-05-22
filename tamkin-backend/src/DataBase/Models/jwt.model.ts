@@ -1,11 +1,16 @@
-import { TokenTypeEnum } from "src/Common/Enums/token.enum";
-import { IJwt } from "src/Common/Interfaces/Jwt/jwt.interface";
-import type { IDeviceInfo } from "src/Common/Interfaces/Jwt/jwt.interface";
-
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { TokenTypeEnum } from 'src/Common/Enums/token.enum';
+import * as jwtInterface from 'src/Common/Interfaces/Jwt/jwt.interface';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
-export class JwtModel implements IJwt {
+export class JwtModel implements jwtInterface.IJwt {
+  
   @PrimaryGeneratedColumn()
   _id: string;
 
@@ -18,7 +23,7 @@ export class JwtModel implements IJwt {
   @Column()
   token: string;
 
-  @Column({ name: 'typ' })
+  @Column()
   type: TokenTypeEnum;
 
   @Column()
@@ -30,8 +35,8 @@ export class JwtModel implements IJwt {
   @Column({ nullable: true })
   revokedAt?: Date;
 
-  @Column({ type: "jsonb" })
-  deviceInfo: IDeviceInfo;
+  @Column({ type: 'jsonb' })
+  deviceInfo: jwtInterface.IDeviceInfo;
 
   @Column()
   ipAddress: string;

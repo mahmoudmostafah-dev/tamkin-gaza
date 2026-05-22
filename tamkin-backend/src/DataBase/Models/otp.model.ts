@@ -1,6 +1,6 @@
+import { OTPStatusEnum, OTPTypeEnum } from "src/Common/Enums/Otp/otp.enum";
+import { I_OTP } from "src/Common/Interfaces/Otp/otp.interface";
 import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
-import { I_OTP } from "src/Common/Interfaces/otp.interface";
-import { E_OTPStatus, OTPTypeEnum } from "src/Common/Enums/otp.enum";
 
 
 @Entity()
@@ -18,8 +18,8 @@ export class OtpModel implements I_OTP {
     @Column({ enum: OTPTypeEnum })
     type: OTPTypeEnum;
 
-    @Column({ enum: E_OTPStatus, default: E_OTPStatus.ACTIVE })
-    status: E_OTPStatus;
+    @Column({ enum: OTPStatusEnum, default: OTPStatusEnum.ACTIVE })
+    status: OTPStatusEnum;
 
     @Column({ type: "timestamp" })
     expiresAt: Date;

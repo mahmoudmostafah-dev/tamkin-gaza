@@ -1,10 +1,11 @@
-import { Body, Controller, Post, Req, Res, UseGuards, UsePipes } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards, UsePipes } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ConfirmEmailDto, GoogleLoginDto, LoginDto, RegisterDto } from './Dto/register.dto';
+import { GoogleLoginDto, LoginDto, RegisterDto } from './Dto/register.dto';
 import { ValidationPipe } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import type { I_Request } from 'src/Common/Types/request.types';
 import { ResponseService } from 'src/Common/Services/Response/response.service';
+import type { IRequest } from 'src/Common/Types/request.types';
+import { ConfirmEmailDto } from './Dto/confirm.email.dto';
 import { AuthenticationGuard } from 'src/Common/Guards/authentication/authentication.guard';
 
 @UsePipes(
@@ -23,13 +24,18 @@ export class AuthController {
 
   @Post('google')
   async loginWithGoogle(
-    @Req() req: Request,
+    @Req() req: IRequest,
     @Res({ passthrough: true }) res: Response,
-    @Body() body: GoogleLoginDto) {
+    @Body() body: GoogleLoginDto,
+  ) {
     const { user, status } = await this.authService.loginWithGoogle(req, res, body);
+
     return this.responseService.success({
-      message: status === "register" ? req.t('auth:success.registeredSuccessfully') : req.t('auth:success.loggedSuccessfully'),
-      info: req.t('auth:success.credentialsSavedInCookiesSuccessfully'),
+      message:
+        status === 'register'
+          ? 'auth.success.registered_successfully'
+          : 'auth.success.logged_successfully',
+      info: 'auth.success.credentials_saved_in_cookies_successfully',
       data: {
         user,
         status,
@@ -39,15 +45,15 @@ export class AuthController {
 
   @Post('register')
   async register(
-    @Req() req: Request,
+    @Req() req: IRequest,
     @Res({ passthrough: true }) res: Response,
     @Body() body: RegisterDto,
   ) {
     const { user } = await this.authService.register(req, res, body);
 
     return this.responseService.success({
-      message: req.t('auth:success.registeredSuccessfully'),
-      info: req.t('auth:success.credentialsSavedInCookiesSuccessfully'),
+      message: 'auth.success.registered_successfully',
+      info: 'auth.success.credentials_saved_in_cookies_successfully',
       data: {
         user,
       },
@@ -56,15 +62,15 @@ export class AuthController {
 
   @Post('login')
   async login(
-    @Req() req: Request,
+    @Req() req: IRequest,
     @Res({ passthrough: true }) res: Response,
     @Body() body: LoginDto,
   ) {
     const { user } = await this.authService.login(req, res, body);
 
     return this.responseService.success({
-      message: req.t('auth:success.loggedSuccessfully'),
-      info: req.t('auth:success.credentialsSavedInCookiesSuccessfully'),
+      message: 'auth.success.logged_successfully',
+      info: 'auth.success.credentials_saved_in_cookies_successfully',
       data: {
         user,
       },
@@ -72,43 +78,33 @@ export class AuthController {
   }
 
   @Post('logout')
-  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    await this.authService.logout(req, res);
+  async logout(@Req() req: IRequest, @Res({ passthrough: true }) res: Response) {
+    await this.authService.logout(req as unknown as Request, res);
 
     return this.responseService.success({
-      message: req.t('auth:success.loggedOutSuccessfully'),
-      info: req.t('auth:success.credentialsDeletedFromCookiesSuccessfully'),
+      message: 'auth.success.logged_out_successfully',
     });
   }
 
   @UseGuards(AuthenticationGuard)
   @Post('request-confirm-email')
-  async requestConfirmEmail(
-    @Req() req: I_Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async requestConfirmEmail(@Req() req: IRequest, @Res({ passthrough: true }) res: Response) {
     await this.authService.requestConfirmEmail(req, res);
 
     return this.responseService.success({
-      message: req.t('auth:success.requestConfirmEmail'),
-      info: req.t('auth:success.otpSentToYourEmailPleaseCheckYourEmailAndConfirmYourEmail')
+      message: 'auth.success.request_confirm_email',
+      info: 'auth.success.otp_sent_to_your_email_please_check_your_email_and_confirm_your_email',
     });
   }
 
   @UseGuards(AuthenticationGuard)
   @Post('confirm-email')
-  async confirmEmail(
-    @Req() req: I_Request,
-    @Body() body: ConfirmEmailDto,
-  ) {
+  async confirmEmail(@Req() req: IRequest, @Body() body: ConfirmEmailDto) {
     await this.authService.confirmEmail(req, body);
 
     return this.responseService.success({
-      message: req.t('auth:success.emailVerifiedSuccessfully'),
-      info: req.t('auth:success.emailVerifiedSuccessfullyInfo'),
+      message: 'auth.success.email_verified_successfully',
+      info: 'auth.success.email_verified_successfully_info',
     });
   }
-
-
-
 }

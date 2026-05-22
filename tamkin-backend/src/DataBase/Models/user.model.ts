@@ -1,15 +1,26 @@
-import { UserProviderEnum, UserRoleEnum } from "src/Common/Enums/User/user.enum";
-import { IUser } from "src/Common/Interfaces/User/user.interface";
-import { Column, CreateDateColumn, Entity, Generated, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { Expose } from "class-transformer";
-
+import {
+  UserProviderEnum,
+  UserRoleEnum,
+} from 'src/Common/Enums/User/user.enum';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Generated,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
+import { Expose } from 'class-transformer';
+import { IUser } from 'src/Common/Interfaces/User/user.interface';
+import { ReelModel } from './reel.model';
 
 @Entity()
 export class UserModel implements IUser {
   @PrimaryGeneratedColumn()
   _id: number;
 
-  @Column({ unique: true })
+  @Column({ type: 'uuid', unique: true })
   @Generated('uuid')
   uuid: string;
 
@@ -50,4 +61,7 @@ export class UserModel implements IUser {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => ReelModel, (reel) => reel.user)
+  reels: ReelModel[];
 }

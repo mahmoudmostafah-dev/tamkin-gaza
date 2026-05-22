@@ -4,15 +4,10 @@ import { ResponseStatusInterceptor } from './Common/Interceptors/response-status
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { ClassSerializerInterceptor } from '@nestjs/common';
-import { i18nInit } from './Config/i18n.config';
-import middleware from 'i18next-http-middleware';
-import i18next from './Config/i18n.config';
 
 async function bootstrap() {
-  await i18nInit();
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
 
-  app.use(middleware.handle(i18next));
   app.use(helmet());
 
   app.getHttpAdapter().getInstance().disable('x-powered-by');

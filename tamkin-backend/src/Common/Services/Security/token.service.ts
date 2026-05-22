@@ -8,10 +8,11 @@ import { UserModel } from '../../../DataBase/Models/user.model';
 import { UserRoleEnum } from '../../Enums/User/user.enum';
 import { ISignToken, IDecoded } from '../../Types/token.types';
 import { SignatureLevelEnum } from '../../Enums/User/signature.level.enum';
-import type { Request } from 'express';
 import { ResponseService } from '../Response/response.service';
+import { TranslationService } from '../Translation/translation.service';
 import { HashingService } from './Hash/hash.service';
 import { ISession } from 'src/Common/Interfaces/Security/client-info.interface';
+import type { IRequest } from 'src/Common/Types/request.types';
 
 @Injectable({ scope: Scope.REQUEST })
 export class TokenService {
@@ -23,15 +24,11 @@ export class TokenService {
     @InjectRepository(UserModel)
     private readonly userRepository: Repository<UserModel>,
     @Inject('REQUEST')
-    private readonly request: Request,
+    private readonly request: IRequest,
   ) {}
 
-  private getSecretKey(
-    tokenType: TokenTypeEnum,
-    signature: SignatureLevelEnum,
-  ): string {
+  private getSecretKey(tokenType: TokenTypeEnum, signature: SignatureLevelEnum): string {
     let key: string | undefined;
-
     switch (tokenType) {
       case TokenTypeEnum.ACCESS:
         switch (signature) {
@@ -63,7 +60,7 @@ export class TokenService {
 
     if (!key) {
       throw this.responseService.serverError({
-        message: this.request.t('token:errors.secret_key_missing'),
+        message: 'token.errors.secret_key_missing',
       });
     }
 
@@ -71,10 +68,7 @@ export class TokenService {
   }
 
   private async signToken(data: ISignToken) {
-    let SECRET_KEY: string = this.getSecretKey(
-      data.tokenType,
-      data.payload.signature,
-    );
+    let SECRET_KEY: string = this.getSecretKey(data.tokenType, data.payload.signature);
 
     const ACCESS_TOKEN_EXPIRES =
       process.env.NODE_ENV === 'Development'
@@ -84,9 +78,7 @@ export class TokenService {
     const REFRESH_TOKEN_EXPIRES = process.env.REFRESH_TOKEN_EXPIRES ?? '7h';
 
     const expiresIn =
-      data.tokenType === TokenTypeEnum.ACCESS
-        ? ACCESS_TOKEN_EXPIRES
-        : REFRESH_TOKEN_EXPIRES;
+      data.tokenType === TokenTypeEnum.ACCESS ? ACCESS_TOKEN_EXPIRES : REFRESH_TOKEN_EXPIRES;
 
     const jti = crypto.randomUUID();
 
@@ -158,15 +150,13 @@ export class TokenService {
       type === TokenTypeEnum.ACCESS
         ? new Date(
             Date.now() +
-              (process.env.NODE_ENV === 'Development'
-                ? 24 * 60 * 60 * 1000
-                : 60 * 60 * 1000),
+              (process.env.NODE_ENV === 'Development' ? 24 * 60 * 60 * 1000 : 60 * 60 * 1000),
           )
         : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
     await this.jwtRepository.save({
       userId,
-      token: await this.hashingService.generateHash( {text:token} ),
+      token: await this.hashingService.generateHash({ text: token }),
       type,
       jti,
       ipAddress: session.ipAddress,
@@ -176,15 +166,12 @@ export class TokenService {
     });
   }
 
-  private verifyToken = async (
-    token: string,
-    secretKey: string,
-  ): Promise<IDecoded> => {
+  private verifyToken = async (token: string, secretKey: string): Promise<IDecoded> => {
     try {
       return jwt.verify(token, secretKey) as IDecoded;
     } catch (error: any) {
       throw this.responseService.unauthorized({
-        message: this.request.t('auth:errors.token_validation_failed'),
+        message: 'auth.errors.token_validation_failed',
         info: error.message,
       });
     }
@@ -207,7 +194,8 @@ export class TokenService {
 
     const decodeJti = (token: string) => {
       try {
-        const tokenPart = token.includes(' ') ? token.split(' ')[1] : token;
+        const tokenParts = token.split(' ');
+        const tokenPart = tokenParts.length > 2 ? tokenParts.slice(2).join(' ') : (tokenParts[1] ?? token);
         const payload = jwt.decode(tokenPart) as IDecoded;
         return payload?.jti;
       } catch (e) {
@@ -234,33 +222,33 @@ export class TokenService {
   }
 
   async decodeToken(token: string, type: TokenTypeEnum) {
-    const SECRET_KEY = this.getSecretKey(
-      type,
-      token.split(' ')[0] as SignatureLevelEnum,
-    );
+    // Fix for signatures that contain spaces like "Super Admin"
+    const tokenParts = token.split(' ');
+    const signature = tokenParts.length > 2 ? `${tokenParts[0]} ${tokenParts[1]}` : tokenParts[0];
+    const tokenValue = tokenParts.length > 2 ? tokenParts.slice(2).join(' ') : tokenParts[1];
+
+    const SECRET_KEY = this.getSecretKey(type, signature as SignatureLevelEnum);
     let decoded: IDecoded;
 
     try {
-      decoded = await this.verifyToken(token.split(' ')[1], SECRET_KEY);
+      decoded = await this.verifyToken(tokenValue, SECRET_KEY);
     } catch (error: any) {
-      const message = this.request.t('token:errors.token_validation_failed');
-
       if (error.name === 'TokenExpiredError') {
         throw this.responseService.unauthorized({
-          message: message,
-          info: this.request.t('token:errors.token_expired'),
+          message: 'token.errors.token_validation_failed',
+          info: 'token.errors.token_expired',
         });
       }
 
       if (error.name === 'JsonWebTokenError') {
         throw this.responseService.unauthorized({
-          message: message,
-          info: this.request.t('auth:errors.token_validation_failed'),
+          message: 'token.errors.token_validation_failed',
+          info: 'auth.errors.token_validation_failed',
         });
       }
 
       throw this.responseService.unauthorized({
-        message: message,
+        message: 'token.errors.token_validation_failed',
         info: error.message,
       });
     }
@@ -284,10 +272,8 @@ export class TokenService {
 
     if (!user) {
       throw this.responseService.unauthorized({
-        message: this.request.t('token:errors.user_account_not_found'),
-        info: this.request.t(
-          'token:errors.the_associated_account_could_not_be_located',
-        ),
+        message: 'token.errors.user_account_not_found',
+        info: 'token.errors.the_associated_account_could_not_be_located',
       });
     }
 
@@ -296,63 +282,47 @@ export class TokenService {
       adminSetting.changeCredentialsTime > new Date(decoded.iat * 1000)
     ) {
       throw this.responseService.unauthorized({
-        message: this.request.t(
-          'token:errors.token_invalidated_by_recent_credential_change',
-        ),
-        info: this.request.t(
-          'token:errors.your_password_or_account_settings_have_been_updated_please_log_in_again',
-        ),
+        message: 'token.errors.token_invalidated_by_recent_credential_change',
+        info: 'token.errors.your_password_or_account_settings_have_been_updated_please_log_in_again',
       });
     }
 
     if (!jwt) {
       throw this.responseService.unauthorized({
-        message: this.request.t('token:errors.invalid_or_revoked_session'),
-        info: this.request.t(
-          'token:errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
-        ),
+        message: 'token.errors.invalid_or_revoked_session',
+        info: 'token.errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
       });
     }
 
     if (jwt.type !== type) {
       throw this.responseService.unauthorized({
-        message: this.request.t('token:errors.invalid_token_type'),
-        info: this.request.t(
-          'token:errors.the_provided_token_does_not_match_the_required_token_type',
-        ),
+        message: 'token.errors.invalid_token_type',
+        info: 'token.errors.the_provided_token_does_not_match_the_required_token_type',
       });
     }
 
     if (jwt.revoked) {
       throw this.responseService.unauthorized({
-        message: this.request.t(
-          'token:errors.session_expired_please_log_in_again',
-        ),
-        info: this.request.t(
-          'token:errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
-        ),
+        message: 'token.errors.session_expired_please_log_in_again',
+        info: 'token.errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
       });
     }
 
     if (jwt.expiresAt < new Date()) {
       if (jwt.type === TokenTypeEnum.REFRESH) {
         throw this.responseService.unauthorized({
-          message: this.request.t('token:errors.refresh_token_has_expired'),
-          info: this.request.t(
-            'token:errors.your_session_has_timed_out_please_log_in_again',
-          ),
+          message: 'token.errors.refresh_token_has_expired',
+          info: 'token.errors.your_session_has_timed_out_please_log_in_again',
         });
       }
 
       throw this.responseService.unauthorized({
-        message: this.request.t('token:errors.access_token_has_expired'),
-        info: this.request.t(
-          'token:errors.your_access_token_has_timed_out_please_refresh_your_session',
-        ),
+        message: 'token.errors.access_token_has_expired',
+        info: 'token.errors.your_access_token_has_timed_out_please_refresh_your_session',
       });
     }
 
-    if (!(await this.hashingService.compareHash({plainText:token,hashText: jwt.token}))) {
+    if (!(await this.hashingService.compareHash({ hashText: jwt.token, plainText: token }))) {
       await this.revokeAllTokensForUser({ userId: user._id });
 
       /*       this.appLogger.warn({
@@ -366,12 +336,8 @@ export class TokenService {
             })
        */
       throw this.responseService.unauthorized({
-        message: this.request.t(
-          'token:errors.session_expired_please_log_in_again',
-        ),
-        info: this.request.t(
-          'token:errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
-        ),
+        message: 'token.errors.session_expired_please_log_in_again',
+        info: 'token.errors.your_session_credentials_are_no_longer_valid_please_log_in_again',
       });
     }
 
