@@ -33,7 +33,7 @@ if [ ! -f .env ]; then
 fi
 
 # 1) Pull latest code
-echo -e "${YELLOW}📥 Pulling latest code from main branch...${NC}"
+echo -e "${YELLOW}📥 Pulling latest code from prod branch...${NC}"
 git checkout prod
 git pull origin prod
 
