@@ -22,8 +22,8 @@ export class GoogleAuthService {
 
       if (!payload?.email_verified) {
         throw this.responseService.badRequest({
-          message: 'auth:errors.fail_to_verify_this_token',
-          info: 'auth:errors.fail_to_verify_this_account',
+          message: 'auth.errors.fail_to_verify_this_token',
+          info: 'auth.errors.fail_to_verify_this_account',
         });
       }
 
@@ -31,17 +31,17 @@ export class GoogleAuthService {
     } catch (error: any) {
       if (error.message.startsWith('Invalid argument: id_token')) {
         throw this.responseService.badRequest({
-          message: 'auth:errors.fail_to_verify_this_token',
-          info: 'auth:errors.invalid_id_token',
+          message: 'auth.errors.fail_to_verify_this_token',
+          info: 'auth.errors.invalid_id_token',
         });
       } else if (error.message.startsWith('Token used too late')) {
         throw this.responseService.badRequest({
-          message: 'auth:errors.fail_to_verify_this_token',
-          info: 'auth:errors.token_used_too_late',
+          message: 'auth.errors.fail_to_verify_this_token',
+          info: 'auth.errors.token_used_too_late',
         });
       } else {
         throw this.responseService.badRequest({
-          message: 'auth:errors.fail_to_verify_this_token',
+          message: 'auth.errors.fail_to_verify_this_token',
         });
       }
     }

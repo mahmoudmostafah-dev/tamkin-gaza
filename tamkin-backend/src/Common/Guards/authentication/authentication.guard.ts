@@ -34,11 +34,11 @@ export class AuthenticationGuard implements CanActivate {
       const userLang = req.userLanguage;
       throw this.responseService.forbidden({
         message: this.translationService.translate(
-          'token:errors.you_are_not_authorized_to_access_this_resource',
+          'token.errors.you_are_not_authorized_to_access_this_resource',
           userLang,
         ),
         info: this.translationService.translate(
-          'token:errors.authorization_header_missing',
+          'token.errors.authorization_header_missing',
           userLang,
         ),
       });

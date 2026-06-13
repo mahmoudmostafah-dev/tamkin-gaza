@@ -15,19 +15,21 @@ import {
 } from '../../Interfaces/Response/response.interface';
 import { TranslationService } from '../Translation/translation.service';
 
+const KNOWN_MODULES = ['auth', 'campaign', 'common', 'email', 'main', 'payment', 'reels', 'token', 'validation'];
+
 @Injectable({ scope: Scope.REQUEST })
 export class ResponseService {
   constructor(private readonly translationService: TranslationService) {}
 
   private translateIfKey(text: string | any): string | any {
-    if (typeof text === 'string' && text.includes(':') && text.includes('.')) {
+    if (typeof text === 'string' && KNOWN_MODULES.some((m) => text.startsWith(m + '.'))) {
       return this.translationService.translate(text);
     }
     return text;
   }
 
   success<T = any>({
-    message = 'common:common.operation_successful',
+    message = 'common.common.operation_successful',
     info,
     statusCode = HttpStatus.OK,
     data,

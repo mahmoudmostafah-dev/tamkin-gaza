@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ReelModel } from 'src/DataBase/Models/reel.model';
 import { UserModel } from 'src/DataBase/Models/user.model';
-import { MinioService } from './Minio/minio.service';
+import { MinioService } from 'src/Common/Minio/minio.service';
 import { IUser } from 'src/Common/Interfaces/User/user.interface';
 import { UserRoleEnum } from 'src/Common/Enums/User/user.enum';
 import { ResponseService } from 'src/Common/Services/Response/response.service';
@@ -62,7 +62,7 @@ export class ReelsService {
       relations: ['user'],
     });
     if (!reel) {
-      this.responseService.notFound({ message: 'reels:errors.not_found' });
+      this.responseService.notFound({ message: 'reels.errors.not_found' });
     }
     return reel!;
   }
@@ -96,11 +96,11 @@ export class ReelsService {
     const reel = await this.reelRepository.findOne({ where: { uuid: reelId }, relations: ['user'] });
 
     if (!reel) {
-      this.responseService.notFound({ message: 'reels:errors.not_found' });
+      this.responseService.notFound({ message: 'reels.errors.not_found' });
     }
 
     if (reel!.user?.uuid !== user.uuid && user.role !== UserRoleEnum.SUPER_ADMIN && user.role !== UserRoleEnum.ADMIN) {
-      this.responseService.forbidden({ message: 'reels:errors.forbidden' });
+      this.responseService.forbidden({ message: 'reels.errors.forbidden' });
     }
 
     if (dto.title !== undefined) reel!.title = dto.title;
@@ -148,12 +148,12 @@ export class ReelsService {
     const reel = await this.reelRepository.findOne({ where: { uuid: reelId }, relations: ['user'] });
 
     if (!reel) {
-      this.responseService.notFound({ message: 'reels:errors.not_found' });
+      this.responseService.notFound({ message: 'reels.errors.not_found' });
       return;
     }
 
     if (reel.user?.uuid !== user.uuid && user.role !== UserRoleEnum.SUPER_ADMIN && user.role !== UserRoleEnum.ADMIN) {
-      this.responseService.forbidden({ message: 'reels:errors.forbidden' });
+      this.responseService.forbidden({ message: 'reels.errors.forbidden' });
       return;
     }
 

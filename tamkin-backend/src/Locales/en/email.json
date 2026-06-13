@@ -1,0 +1,8 @@
+{
+   "errors": {
+    "emailConfigMissing": "Email configuration is missing",
+    "emailConfigMissingInfo": "Email configuration is missing. Please contact support.",
+    "failToSendEmail": "Failed to send email",
+    "failToSendEmailInfo": "Failed to send email. Please try again later."
+   }
+}

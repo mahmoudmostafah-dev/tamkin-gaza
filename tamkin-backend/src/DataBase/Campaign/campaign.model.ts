@@ -3,15 +3,17 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  Generated,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { CampaignDto } from 'src/Modules/Campaign/Dtos/campaign.dto';
 
-@Entity('Campaigns')
+@Entity('campaign')
 export class Campaign {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  uuid: string;
 
   @Column({ type: 'jsonb', unique: true })
   title: CampaignDto['title'];
@@ -22,11 +24,14 @@ export class Campaign {
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   target_amount: number;
 
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  current_amount: number;
+
   @Column({ unique: true })
   slug: string;
 
-  @Column({ nullable: true })
-  image: string;
+  @Column({ type: 'jsonb', nullable: true })
+  image: string[];
 
   @Column({
     type: 'enum',
@@ -40,4 +45,7 @@ export class Campaign {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @DeleteDateColumn()
+  deleted_at: Date;
 }

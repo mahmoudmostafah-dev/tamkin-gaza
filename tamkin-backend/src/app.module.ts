@@ -15,12 +15,12 @@ import { CommonModule } from './Common/common.module';
 import { TypeORMConfig } from './Config/typeorm.config';
 import { CampaignModule } from './Modules/Campaign/campaign.module';
 import { LanguageMiddleware } from './Middlewares/language.middleware';
-import { JsonFileService } from './Common/Services/Json/json-file.service';
 import { APP_PIPE } from '@nestjs/core';
 import { CustomValidationPipe } from './Common/Pipes/custom.validation.pipe';
-import { TranslationService } from './Common/Services/Translation/translation.service';
-import { MinioModule } from './Modules/Reels/Minio/minio.module';
+import { MinioModule } from './Common/Minio/minio.module';
 import { ReelsModule } from './Modules/Reels/reels.module';
+import { PaymentModule } from './Modules/Payment/payment.module';
+import { I18nModule, I18nJsonLoader } from 'nestjs-i18n';
 
 @Module({
   imports: [
@@ -33,17 +33,26 @@ import { ReelsModule } from './Modules/Reels/reels.module';
       serveRoot: '/pictures',
     }),
     TypeOrmModule.forRootAsync(TypeORMConfig),
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      loader: I18nJsonLoader,
+      loaderOptions: {
+        path: join(__dirname, '..', 'assets', 'translations'),
+        watch: false,
+        includeSubfolders: true,
+      },
+      returnObjects: true,
+    }),
     CommonModule,
     AuthModule,
     CampaignModule,
     MinioModule,
     ReelsModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    JsonFileService,
-    TranslationService,
     {
       provide: APP_PIPE,
       useClass: CustomValidationPipe,

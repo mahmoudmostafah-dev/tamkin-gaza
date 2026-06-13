@@ -5,6 +5,8 @@ import { TranslationService } from '../Services/Translation/translation.service'
 import { REQUEST } from '@nestjs/core';
 import type { IRequest } from '../Types/request.types';
 
+const KNOWN_MODULES = ['auth', 'campaign', 'common', 'email', 'main', 'reels', 'token', 'validation'];
+
 @Injectable({ scope: Scope.REQUEST })
 export class CustomValidationPipe extends ValidationPipe {
   constructor(
@@ -29,8 +31,8 @@ export class CustomValidationPipe extends ValidationPipe {
       const translatedMessages: string[] = [];
 
       constraints.forEach((key) => {
-        // check if the key is one of OUR keys (contains module:file.key)
-        const isCustomKey = key.includes(':') && key.includes('.');
+        // check if the key is one of OUR keys (starts with module.file.key)
+        const isCustomKey = KNOWN_MODULES.some((m) => key.startsWith(m + '.'));
 
         if (isCustomKey) {
           if (key.includes('|')) {
@@ -60,7 +62,7 @@ export class CustomValidationPipe extends ValidationPipe {
       };
     });
     return this.responseService.badRequest({
-      message: 'common:common.validation_failed',
+      message: 'common.common.validation_failed',
       issues: formattedErrors,
     });
   }
