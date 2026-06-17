@@ -22,6 +22,7 @@ import {
   QueryResolver,
   HeaderResolver,
 } from 'nestjs-i18n';
+import { PaymentModule } from './Modules/Payment/payment.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import {
     CampaignModule,
     MinioModule,
     ReelsModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [

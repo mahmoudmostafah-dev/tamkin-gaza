@@ -57,5 +57,19 @@
     "privacy": "Privacy",
     "terms": "Terms",
     "rights": "All rights reserved"
+  },
+  "dashboard":{
+    "dashboard":"Dashboard",
+    "users":"Users",
+    "reals":"Reals",
+    "overview": "Overview",
+    "menu": "Menu",
+    "campaigns": "Campaigns",
+    "team": "Team",
+    "analytics": "Analytics",
+    "payments": "Payments",
+    "logout": "Logout",
+    "search": "Search...",
+    "profile": "Profile"
   }
 }
