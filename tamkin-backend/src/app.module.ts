@@ -1,8 +1,4 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  OnApplicationBootstrap,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module, OnApplicationBootstrap } from '@nestjs/common';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigModule } from '@nestjs/config';
@@ -19,7 +15,13 @@ import { APP_PIPE } from '@nestjs/core';
 import { CustomValidationPipe } from './Common/Pipes/custom.validation.pipe';
 import { MinioModule } from './Common/Minio/minio.module';
 import { ReelsModule } from './Modules/Reels/reels.module';
-import { I18nModule, I18nJsonLoader } from 'nestjs-i18n';
+import {
+  I18nModule,
+  I18nJsonLoader,
+  AcceptLanguageResolver,
+  QueryResolver,
+  HeaderResolver,
+} from 'nestjs-i18n';
 
 @Module({
   imports: [
@@ -33,13 +35,18 @@ import { I18nModule, I18nJsonLoader } from 'nestjs-i18n';
     }),
     TypeOrmModule.forRootAsync(TypeORMConfig),
     I18nModule.forRoot({
-      fallbackLanguage: 'en',
+      fallbackLanguage: 'ar',
       loader: I18nJsonLoader,
       loaderOptions: {
         path: join(__dirname, '..', 'assets', 'translations'),
         watch: false,
         includeSubfolders: true,
       },
+      resolvers: [
+        { use: QueryResolver, options: ['lang'] },
+        new HeaderResolver(['x-custom-lang']),
+        AcceptLanguageResolver,
+      ],
       returnObjects: true,
     }),
     CommonModule,
@@ -59,9 +66,9 @@ import { I18nModule, I18nJsonLoader } from 'nestjs-i18n';
 })
 export class AppModule implements OnApplicationBootstrap {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LanguageMiddleware).forRoutes('*');
+    // LanguageMiddleware removed
   }
-  constructor(private dataSource: DataSource) { }
+  constructor(private dataSource: DataSource) {}
 
   async onApplicationBootstrap() {
     if (this.dataSource.isInitialized) {

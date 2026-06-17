@@ -13,7 +13,7 @@ async function bootstrap() {
   app.getHttpAdapter().getInstance().disable('x-powered-by');
 
   app.enableCors({
-    origin: ['http://localhost:4200'],
+    origin: ['http://localhost:' + process.env.FRONTEND_PORT],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });

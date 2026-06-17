@@ -1,9 +1,3 @@
-import languagesConfig from '../../../Config/Language/language.json';
+export type LanguageCode = 'ar' | 'en' | 'tr' | 'ur';
 
-type ElementType = (typeof languagesConfig)[number];
-
-export type LanguageCode = keyof ElementType;
-
-export const SUPPORTED_LANGUAGES = languagesConfig.flatMap((obj) =>
-  Object.keys(obj),
-) as LanguageCode[];
+export const SUPPORTED_LANGUAGES = ['ar', 'en', 'tr', 'ur'] as LanguageCode[];

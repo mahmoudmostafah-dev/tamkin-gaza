@@ -27,10 +27,10 @@ export class CookiesService {
     const maxAge = isAccess
       ? ACCESS_TOKEN_IN_COOKIES
       : REFRESH_TOKEN_IN_COOKIES;
-
+    console.log('token', token);
     res.cookie(name, token, {
       httpOnly: true,
-      secure: true,
+      secure: false,
       sameSite: 'lax',
       maxAge,
     });
@@ -43,7 +43,7 @@ export class CookiesService {
 
     res.clearCookie(name, {
       httpOnly: true,
-      secure: true,
+      secure: false,
       sameSite: 'lax',
     });
   }

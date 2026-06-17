@@ -11,7 +11,7 @@ import {
 import { CampaignDto } from 'src/Modules/Campaign/Dtos/campaign.dto';
 
 @Entity('campaign')
-export class Campaign {
+export class CampaignModel {
   @PrimaryGeneratedColumn('uuid')
   uuid: string;
 
