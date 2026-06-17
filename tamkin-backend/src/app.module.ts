@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DataSource } from 'typeorm';
+import { HashingService } from './Common/Services/Security/Hash/hash.service';
 import { AuthModule } from './Modules/Auth/auth.module';
 import { CommonModule } from './Common/common.module';
 import { TypeORMConfig } from './Config/typeorm.config';
@@ -23,6 +24,7 @@ import {
   HeaderResolver,
 } from 'nestjs-i18n';
 import { PaymentModule } from './Modules/Payment/payment.module';
+import { seed, ensureAdmin } from './DataBase/seed';
 
 @Module({
   imports: [
@@ -70,13 +72,28 @@ export class AppModule implements OnApplicationBootstrap {
   configure(consumer: MiddlewareConsumer) {
     // LanguageMiddleware removed
   }
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    private hashingService: HashingService,
+  ) {}
 
   async onApplicationBootstrap() {
     if (this.dataSource.isInitialized) {
       console.log('Database connected successfully 🟢 ');
     } else {
       console.log('Fail To connect to database 🔴 ');
+    }
+    if (!process.env.SKIP_SEED) {
+      try {
+        await ensureAdmin(this.dataSource, this.hashingService);
+      } catch (err) {
+        console.error('Failed to ensure admin on bootstrap:', err);
+      }
+      // Do NOT call full `seed()` here — it creates a new AppModule context
+      // which would trigger `onApplicationBootstrap()` again and recurse.
+      console.log('Admin ensured on bootstrap. Full seeding is reserved for CLI.');
+    } else {
+      console.log('Skipping automatic seed (SKIP_SEED is set)');
     }
   }
 }

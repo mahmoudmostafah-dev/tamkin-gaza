@@ -12,7 +12,29 @@ import { PaymentProviderEnum } from '../Modules/Payment/Enums/payment-provider.e
 import { faker } from '@faker-js/faker';
 import { CampaignModel } from './Models/campaign.model';
 
-async function bootstrap() {
+export async function ensureAdmin(dataSource: DataSource, hashingService: HashingService) {
+  const userRepository = dataSource.getRepository(UserModel);
+  const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@tamkin.com';
+  let admin = await userRepository.findOne({ where: { email: adminEmail } });
+  if (!admin) {
+    console.log('Creating Admin User...');
+    const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'AdminPassword123!';
+    admin = userRepository.create({
+      firstName: 'Super',
+      lastName: 'Admin',
+      email: adminEmail,
+      emailVerified: true,
+      provider: UserProviderEnum.SYSTEM,
+      password: await hashingService.generateHash({ text: adminPassword }),
+      role: UserRoleEnum.SUPER_ADMIN,
+    });
+    await userRepository.save(admin);
+  } else {
+    console.log('Admin User already exists. Skipping...');
+  }
+}
+
+export async function seed() {
   const app = await NestFactory.createApplicationContext(AppModule);
   const dataSource = app.get(DataSource);
   const hashingService = app.get(HashingService);
@@ -24,39 +46,47 @@ async function bootstrap() {
 
   console.log('🌱 Starting database seeding...');
 
-  // 1. Seed Admin
-  const adminEmail = 'admin@tamkin.com';
-  let admin = await userRepository.findOne({ where: { email: adminEmail } });
-  if (!admin) {
-    console.log('Creating Admin User...');
-    admin = userRepository.create({
-      firstName: 'Super',
-      lastName: 'Admin',
-      email: adminEmail,
-      emailVerified: true,
-      provider: UserProviderEnum.SYSTEM,
-      password: await hashingService.generateHash({ text: 'AdminPassword123!' }),
-      role: UserRoleEnum.SUPER_ADMIN,
-    });
-    await userRepository.save(admin);
-  } else {
-    console.log('Admin User already exists. Skipping...');
-  }
+  // 1. Ensure admin exists
+  await ensureAdmin(dataSource, hashingService);
 
   // 2. Seed Users
   console.log('Creating regular users...');
   const users: UserModel[] = [];
-  for (let i = 0; i < 10; i++) {
+  // Collect existing emails to avoid unique constraint violations
+  const existingUsers = await userRepository.find({ select: ['email'] });
+  const existingEmails = new Set(existingUsers.map((u) => u.email?.toLowerCase()));
+
+  let createdCount = 0;
+  while (createdCount < 10) {
+    const generatedEmail = faker.internet.email().toLowerCase();
+    if (existingEmails.has(generatedEmail)) {
+      // collision, try again
+      continue;
+    }
+
     const user = userRepository.create({
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
-      email: faker.internet.email(),
+      email: generatedEmail,
       emailVerified: true,
       provider: UserProviderEnum.SYSTEM,
       password: await hashingService.generateHash({ text: 'UserPassword123!' }),
       role: UserRoleEnum.USER,
     });
-    users.push(await userRepository.save(user));
+
+    try {
+      const saved = await userRepository.save(user);
+      users.push(saved);
+      existingEmails.add(generatedEmail);
+      createdCount++;
+    } catch (err: any) {
+      // If a duplicate slipped through due to race condition, skip and continue
+      console.warn(
+        'Warning: failed to save user (possible duplicate), retrying...',
+        err?.message ?? err,
+      );
+      continue;
+    }
   }
 
   // 3. Seed Campaigns
@@ -137,7 +167,14 @@ async function bootstrap() {
   await app.close();
 }
 
-bootstrap().catch((err) => {
-  console.error('❌ Seeding failed:', err);
-  process.exit(1);
-});
+// If this file is executed directly (via `ts-node src/DataBase/seed.ts`),
+// set a flag so that when we create an application context with AppModule
+// the module's bootstrap won't re-run the seeder and cause recursion.
+declare const require: any;
+if (typeof require !== 'undefined' && require.main === module) {
+  process.env.SKIP_SEED = '1';
+  seed().catch((err) => {
+    console.error('❌ Seeding failed:', err);
+    process.exit(1);
+  });
+}
