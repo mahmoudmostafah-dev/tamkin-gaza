@@ -3,20 +3,21 @@ import { MinioService } from 'src/Common/Minio/minio.service';
 import { CreateCampaignDto } from './Dtos/create-campaign.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Campaign } from '../../DataBase/Campaign/campaign.model';
+import { CampaignModel } from '../../DataBase/Models/campaign.model';
 import { ResponseService } from 'src/Common/Services/Response/response.service';
 import { CampaignDto } from './Dtos/campaign.dto';
-import type { IRequest } from 'src/Common/Types/request.types';
-import { REQUEST } from '@nestjs/core';
+import { I18nContext } from 'nestjs-i18n';
 import { UpdateCampaignDto } from './Dtos/update-campaign.dto';
 import { createSlug } from 'src/Common/Utils/Slug/slug';
 import { CampaignStatusEnum } from './Enums/campaign-status.enum';
+import { IRequest } from 'src/Common/Types/request.types';
+import { REQUEST } from '@nestjs/core';
 
 @Injectable()
 export class CampaignService {
   constructor(
-    @InjectRepository(Campaign)
-    private readonly campaignRepository: Repository<Campaign>,
+    @InjectRepository(CampaignModel)
+    private readonly campaignRepository: Repository<CampaignModel>,
     private readonly responseService: ResponseService,
     private readonly minioService: MinioService,
     @Inject(REQUEST) private readonly request: IRequest,
@@ -44,7 +45,7 @@ export class CampaignService {
 
   async getCampaignInLanguage(campaignUuid: string) {
     const campaign = await this.findByUuid(campaignUuid);
-    const userLanguage = this.request.userLanguage;
+    const userLanguage = I18nContext.current()?.lang || 'ar';
     if (!campaign || campaign.status === CampaignStatusEnum.DRAFT)
       throw this.responseService.notFound({ message: 'campaign.errors.campaign_not_found' });
 
@@ -59,7 +60,7 @@ export class CampaignService {
     const campaigns = await this.campaignRepository.find({
       where: { status: CampaignStatusEnum.ACTIVE },
     });
-    const userLanguage = this.request.userLanguage;
+    const userLanguage = I18nContext.current()?.lang || 'ar';
 
     return campaigns.map((campaign) => ({
       ...campaign,
@@ -107,7 +108,7 @@ export class CampaignService {
         message: 'campaign.errors.campaign_not_found',
       });
 
-    const updateData: Partial<Campaign> = { ...updateCampaignDto };
+    const updateData: Partial<CampaignModel> = { ...updateCampaignDto };
     if (updateCampaignDto.title) {
       updateData.slug = createSlug(updateCampaignDto.title.en);
     }
@@ -174,6 +175,27 @@ export class CampaignService {
     await this.campaignRepository.update(
       { uuid: campaign.uuid },
       { status: CampaignStatusEnum.ACTIVE },
+    );
+
+    return await this.findByUuid(campaignUuid);
+  }
+
+  /**
+   * Increment the campaign's current_amount by the given amount.
+   * Called from the payment webhook when a payment succeeds.
+   */
+  async incrementRaisedAmount(campaignUuid: string, amount: number) {
+    const campaign = await this.findByUuid(campaignUuid);
+
+    if (!campaign)
+      throw this.responseService.notFound({
+        message: 'campaign.errors.campaign_not_found',
+      });
+
+    await this.campaignRepository.increment(
+      { uuid: campaign.uuid },
+      'current_amount',
+      amount,
     );
 
     return await this.findByUuid(campaignUuid);

@@ -1,7 +1,6 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Response, NextFunction } from 'express';
-import { LanguageCode } from 'src/Common/Interfaces/Language/languages-config.interface';
-import languagesConfig from '../Config/Language/language.json';
+import { LanguageCode, SUPPORTED_LANGUAGES } from 'src/Common/Interfaces/Language/languages-config.interface';
 import { TranslationService } from 'src/Common/Services/Translation/translation.service';
 import { IRequest } from 'src/Common/Types/request.types';
 
@@ -13,7 +12,7 @@ export class LanguageMiddleware implements NestMiddleware {
 
     const requestedLang = header.split(',')[0].split('-')[0].toLowerCase();
 
-    const isSupported = languagesConfig.some(
+    const isSupported = SUPPORTED_LANGUAGES.some(
       (item) => Object.keys(item)[0] === requestedLang,
     );
 

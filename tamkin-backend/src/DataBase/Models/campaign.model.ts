@@ -10,8 +10,8 @@ import {
 } from 'typeorm';
 import { CampaignDto } from 'src/Modules/Campaign/Dtos/campaign.dto';
 
-@Entity('campaign')
-export class Campaign {
+@Entity('campaign_model')
+export class CampaignModel {
   @PrimaryGeneratedColumn('uuid')
   uuid: string;
 
