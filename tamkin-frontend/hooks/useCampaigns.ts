@@ -58,3 +58,11 @@ export function useApproveCampaign() {
     onSuccess: () => qc.invalidateQueries({ queryKey: [CAMPAIGNS_KEY] }),
   });
 }
+
+export function useCampaignSearch(params?: { q?: string; status?: string }) {
+  return useQuery({
+    queryKey: [CAMPAIGNS_KEY, "search", params],
+    queryFn: () => campaignApi.search(params),
+    enabled: !!params?.q || !!params?.status,
+  });
+}
