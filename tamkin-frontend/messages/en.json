@@ -12,7 +12,9 @@
         "completed": "Completed",
         "draft": "Draft",
         "canceled": "Canceled",
-        "clearFilters": "Clear filters"
+        "clearFilters": "Clear filters",
+    "viewAll": "View all"
+
     },
     "campaignCard": {
         "active": "Active",
@@ -177,5 +179,29 @@
     "logout": "Logout",
     "search": "Search...",
     "profile": "Profile"
+  },
+  "mediaSection": {
+    "heading": "Media & Updates",
+    "subtitle": "Latest From The Ground",
+    "showMedia": "Show Media",
+    "scrollLeft": "Scroll left",
+    "scrollRight": "Scroll right"
+  },
+  "contactSection": {
+    "heading": "Get In Touch",
+    "subtitle": "We'd love to hear from you",
+    "description": "Whether you have a question about our campaigns, want to volunteer, or just want to say hello — we're here and we read every message.",
+    "nameLabel": "Your Name",
+    "namePlaceholder": "Enter your name",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "you@example.com",
+    "subjectLabel": "Subject",
+    "subjectPlaceholder": "What is this about?",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Tell us more...",
+    "submit": "Send Message",
+    "sending": "Sending...",
+    "success": "Message sent successfully! We'll get back to you soon.",
+    "error": "Something went wrong. Please try again."
   }
 }

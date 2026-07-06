@@ -12,7 +12,8 @@
     "completed": "مکمل",
     "draft": "مسودہ",
     "canceled": "منسوخ",
-    "clearFilters": "فلٹر صاف کریں"
+    "clearFilters": "فلٹر صاف کریں",
+    "viewAll": "سب دیکھیں"
   },
   "campaignCard": {
     "active": "فعال",
@@ -177,5 +178,29 @@
     "nationality": "قومیت",
     "memberSince": "رکنیت از",
     "notVerified": "ای میل تصدیق شدہ نہیں"
+  },
+  "mediaSection": {
+    "heading": "میڈیا اور اپ ڈیٹس",
+    "subtitle": "میدان سے تازہ ترین",
+    "showMedia": "میڈیا دیکھیں",
+    "scrollLeft": "بائیں جانب اسکرول کریں",
+    "scrollRight": "دائیں جانب اسکرول کریں"
+  },
+  "contactSection": {
+    "heading": "رابطہ کریں",
+    "subtitle": "ہم آپ سے سن کر خوش ہوں گے",
+    "description": "چاہے آپ کو ہماری مہمات کے بارے میں کوئی سوال ہو، رضاکارانہ طور پر کام کرنا چاہتے ہوں، یا صرف ہیلو کہنا چاہتے ہوں — ہم یہاں ہیں اور ہر پیغام پڑھتے ہیں۔",
+    "nameLabel": "آپ کا نام",
+    "namePlaceholder": "اپنا نام درج کریں",
+    "emailLabel": "ای میل پتہ",
+    "emailPlaceholder": "you@example.com",
+    "subjectLabel": "موضوع",
+    "subjectPlaceholder": "یہ کس بارے میں ہے؟",
+    "messageLabel": "پیغام",
+    "messagePlaceholder": "ہمیں مزید بتائیں...",
+    "submit": "پیغام بھیجیں",
+    "sending": "بھیجا جا رہا ہے...",
+    "success": "پیغام کامیابی سے بھیج دیا گیا! ہم جلد آپ سے رابطہ کریں گے۔",
+    "error": "کچھ غلط ہو گیا۔ براہ کرم دوبارہ کوشش کریں۔"
   }
 }

@@ -130,7 +130,7 @@ const CampaignCard: React.FC<CampaignCardProps> = ({
 
               <div className="relative h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
                 <div
-                  className="absolute left-0 top-0 h-full rounded-full bg-gradient-to-r from-primary-500 via-violet-500 to-fuchsia-500 transition-all duration-700"
+                  className="absolute left-0 top-0 h-full rounded-full bg-primary-700  transition-all duration-700"
                   style={{ width: `${progress}%` }}
                 />
               </div>

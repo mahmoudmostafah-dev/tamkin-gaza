@@ -1,27 +1,119 @@
 "use client";
 
-import React from "react";
+import { useState } from "react";
+import Image from "next/image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const bannerSrc =
-  "https://images.unsplash.com/photo-1647264943610-1f1420b28ccc?w=1600&h=800&fit=crop";
+interface Slide {
+  image: string;
+  title: string;
+  description: string;
+}
 
-const ReelsSection = () => {
+const slides: Slide[] = [
+  {
+    image:
+      "https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=2070&auto=format&fit=crop",
+    title: "Food Donation",
+    description: "Providing meals and essential supplies to families in need.",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop",
+    title: "Helping Communities",
+    description:
+      "Volunteers working together to support underprivileged communities.",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1469571486292-b53601020f1b?q=80&w=2070&auto=format&fit=crop",
+    title: "Support & Care",
+    description:
+      "Every contribution helps bring hope to those facing hardship.",
+  },
+];
+
+export default function ImageSlider() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const prevSlide = () => {
+    setCurrentIndex((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+  };
+
+  const nextSlide = () => {
+    setCurrentIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+  };
+
+  // Check direction for RTL support from document or html dir if possible
+  // A simple way is to use inline style for transform to move the exact percentage
+  const slideWidth = 100 / slides.length;
+  // in LTR: translate -currentIndex * slideWidth. In RTL: translate currentIndex * slideWidth.
+  // We'll use `dir="ltr"` on the slider container to ensure it behaves consistently and just flip the flex-direction if needed,
+  // or simply rely on standard CSS. If the page is RTL, flex lays out items right-to-left.
+  // So moving to index 1 (which is left of index 0) means translating right (positive %).
+  const isRTL =
+    typeof window !== "undefined"
+      ? document.documentElement.dir === "rtl"
+      : false;
+
   return (
-    <section className="py-6">
-      <div className="mx-auto w-full max-w-7xl px-4">
-        <div className="relative w-full aspect-[2/1] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-md">
-          <img
-            src={
-              "http://localhost:3200/_next/image?url=https%3A%2F%2Fmedia.istockphoto.com%2Fid%2F1285484294%2Fphoto%2Flittle-child-boy-hiding-in-old-vintage-suitcase-in-the-attic.webp%3Fa%3D1%26b%3D1%26s%3D612x612%26w%3D0%26k%3D20%26c%3DcM2PBmrv26qpy3evJcpjEtRwA8gmf_P3mo4S7QtjU6I%3D&w=1080&q=75"
-            }
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
-        </div>
-      </div>
-    </section>
-  );
-};
+    <div className="relative w-full overflow-hidden min-h-[50vh] rounded-xl bg-[#f7ecdd]">
+      <div
+        className="flex transition-transform duration-500 ease-out h-full"
+        style={{
+          width: `${slides.length * 100}%`,
+          transform: `translateX(${isRTL ? currentIndex * slideWidth : -currentIndex * slideWidth}%)`,
+        }}
+      >
+        {slides.map((slide, index) => (
+          <div
+            key={index}
+            className="flex-shrink-0"
+            style={{ width: `${slideWidth}%` }}
+          >
+            <div className="flex flex-col md:grid grid-cols-2 h-full">
+              {/* Left Side */}
+              <div className="flex items-center justify-center p-8 bg-muted/20">
+                <div className="relative h-[400px] w-full max-w-sm overflow-hidden rounded-xl shadow-lg">
+                  <Image
+                    src={slide.image}
+                    alt={slide.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </div>
 
-export default ReelsSection;
+              {/* Right Side */}
+              <div className="flex flex-col justify-center gap-10 p-8">
+                <h2 className="my-8 text-6xl font-bold">{slide.title}</h2>
+
+                <p className="leading-7 text-muted-foreground text-3xl">
+                  {slide.description}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Left Button */}
+      <button
+        onClick={prevSlide}
+        className="absolute left-0 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/90 hover:bg-white flex items-center justify-center shadow-md rounded-r-2xl transition-all z-10"
+        aria-label="Previous slide"
+      >
+        <ChevronLeft className="w-6 h-6 text-gray-800" />
+      </button>
+
+      {/* Right Button */}
+      <button
+        onClick={nextSlide}
+        className="absolute right-0 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/90 hover:bg-white flex items-center justify-center shadow-md rounded-l-2xl transition-all z-10"
+        aria-label="Next slide"
+      >
+        <ChevronRight className="w-6 h-6 text-gray-800" />
+      </button>
+    </div>
+  );
+}

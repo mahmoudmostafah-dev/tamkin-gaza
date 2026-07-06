@@ -12,7 +12,8 @@
     "completed": "مكتمل",
     "draft": "مسودة",
     "canceled": "ملغي",
-    "clearFilters": "مسح التصفية"
+    "clearFilters": "مسح التصفية",
+    "viewAll": "عرض الكل"
   },
   "campaignCard": {
     "active": "نشط",
@@ -188,5 +189,29 @@
     "nationality": "الجنسية",
     "memberSince": "عضو منذ",
     "notVerified": "البريد الإلكتروني غير موثق"
+  },
+  "mediaSection": {
+    "heading": "وسائط وتحديثات",
+    "subtitle": "آخر المستجدات من الميدان",
+    "showMedia": "عرض الوسائط",
+    "scrollLeft": "التمرير لليسار",
+    "scrollRight": "التمرير لليمين"
+  },
+  "contactSection": {
+    "heading": "تواصل معنا",
+    "subtitle": "يسعدنا سماع رأيك",
+    "description": "سواء كان لديك استفسار عن حملاتنا، أو ترغب في التطوع، أو فقط تريد إلقاء التحية — نحن هنا ونقرأ كل رسالة.",
+    "nameLabel": "الاسم",
+    "namePlaceholder": "أدخل اسمك",
+    "emailLabel": "البريد الإلكتروني",
+    "emailPlaceholder": "you@example.com",
+    "subjectLabel": "الموضوع",
+    "subjectPlaceholder": "عن ماذا تريد التحدث؟",
+    "messageLabel": "الرسالة",
+    "messagePlaceholder": "أخبرنا المزيد...",
+    "submit": "إرسال الرسالة",
+    "sending": "جارٍ الإرسال...",
+    "success": "تم إرسال الرسالة بنجاح! سنتواصل معك قريبًا.",
+    "error": "حدث خطأ ما. حاول مرة أخرى."
   }
 }

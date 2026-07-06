@@ -12,7 +12,8 @@
     "completed": "Tamamlandı",
     "draft": "Taslak",
     "canceled": "İptal Edildi",
-    "clearFilters": "Filtreleri Temizle"
+    "clearFilters": "Filtreleri Temizle",
+    "viewAll": "Tümünü Gör"
   },
   "campaignCard": {
     "active": "Aktif",
@@ -177,5 +178,29 @@
     "nationality": "Uyruk",
     "memberSince": "Üyelik tarihi",
     "notVerified": "E-posta doğrulanmadı"
+  },
+  "mediaSection": {
+    "heading": "Medya ve Güncellemeler",
+    "subtitle": "Sahadan Son Haberler",
+    "showMedia": "Medyayı Göster",
+    "scrollLeft": "Sola kaydır",
+    "scrollRight": "Sağa kaydır"
+  },
+  "contactSection": {
+    "heading": "İletişime Geçin",
+    "subtitle": "Sizden haber almak isteriz",
+    "description": "Kampanyalarımız hakkında bir sorunuz varsa, gönüllü olmak istiyorsanız veya sadece merhaba demek istiyorsanız — buradayız ve her mesajı okuyoruz.",
+    "nameLabel": "Adınız",
+    "namePlaceholder": "Adınızı girin",
+    "emailLabel": "E-posta Adresi",
+    "emailPlaceholder": "you@example.com",
+    "subjectLabel": "Konu",
+    "subjectPlaceholder": "Bu ne hakkında?",
+    "messageLabel": "Mesaj",
+    "messagePlaceholder": "Bize daha fazla bilgi verin...",
+    "submit": "Mesaj Gönder",
+    "sending": "Gönderiliyor...",
+    "success": "Mesaj başarıyla gönderildi! En kısa sürede size döneceğiz.",
+    "error": "Bir şey ters gitti. Lütfen tekrar deneyin."
   }
 }

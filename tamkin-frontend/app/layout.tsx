@@ -8,6 +8,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import QueryProvider from "@/components/QueryProvider";
 import { AuthProvider } from "@/components/AuthProvider";
+import QuranQuote from "@/components/common/QuranQuote";
 
 const fontArabic = localFont({
   src: "../FormaDJRArabicDisplay-Medium-Testing.otf",
@@ -78,15 +79,21 @@ export default async function RootLayout({
     <html
       lang={locale}
       dir={isRTL ? "rtl" : "ltr"}
-      className={`${isRTL ? fontArabic.variable : fontEnglish.variable} h-full overflow-x-hidden max-w-screen antialiased ${isRTL ? "rtl" : "ltr"}`}
-      style={{ "--font-sans": isRTL ? "var(--font-arabic)" : "var(--font-english)" } as React.CSSProperties}
+      className={`${isRTL ? fontArabic.variable : fontEnglish.variable} h-full max-w-screen antialiased ${isRTL ? "rtl" : "ltr"}`}
+      style={
+        {
+          "--font-sans": isRTL ? "var(--font-arabic)" : "var(--font-english)",
+        } as React.CSSProperties
+      }
     >
       <body className="min-h-full flex flex-col bg-white text-gray-900">
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>
             <QueryProvider>
               <Toaster position="top-center" />
-              <main className="flex-1">{children}</main>
+              <QuranQuote></QuranQuote>
+
+              <main className="flex-1 overflow-x-clip">{children}</main>
             </QueryProvider>
           </AuthProvider>
         </NextIntlClientProvider>

@@ -38,7 +38,7 @@ export const LanguageSwitcher = () => {
         <Languages className="w-5 h-5 text-gray-500 group-hover:text-primary-600" />
         <span className="text-sm font-medium uppercase">{currentLocale}</span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800">
+      <DropdownMenuContent align="end" className="w-40 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 z-[70]">
         {locales.map((locale) => (
           <DropdownMenuItem
             key={locale}

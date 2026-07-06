@@ -7,12 +7,15 @@ export default async function Footer() {
   const t = await getTranslations("footer");
 
   return (
-    <footer className="border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 mt-20">
+    <footer className="border-t border-gray-100 dark:border-gray-800 bg-primary-800 dark:bg-gray-900/50 mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
           {/* BRAND */}
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link href="/" className="inline-flex items-center gap-2 font-black text-2xl text-gray-900 dark:text-white tracking-tight">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 font-black text-2xl text-yellow-300 tracking-tight"
+            >
               تمكين
             </Link>
             <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
@@ -22,22 +25,31 @@ export default async function Footer() {
 
           {/* CAMPAIGNS */}
           <div>
-            <h4 className="font-bold text-sm text-gray-900 dark:text-white uppercase tracking-wider mb-4">
+            <h4 className="font-bold text-sm text-yellow-300 uppercase tracking-wider mb-4">
               {t("campaigns")}
             </h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/campaigns" className="text-sm text-muted-foreground hover:text-primary-600 transition-colors">
+                <Link
+                  href="/campaigns"
+                  className="text-sm text-muted-foreground hover:text-yellow-300 transition-colors"
+                >
                   {t("campaigns")}
                 </Link>
               </li>
               <li>
-                <Link href="/stories" className="text-sm text-muted-foreground hover:text-primary-600 transition-colors">
+                <Link
+                  href="/stories"
+                  className="text-sm text-muted-foreground hover:text-yellow-300 transition-colors"
+                >
                   {t("stories")}
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-sm text-muted-foreground hover:text-primary-600 transition-colors">
+                <Link
+                  href="/about"
+                  className="text-sm text-muted-foreground hover:text-yellow-300 transition-colors"
+                >
                   {t("about")}
                 </Link>
               </li>
@@ -46,22 +58,31 @@ export default async function Footer() {
 
           {/* SUPPORT */}
           <div>
-            <h4 className="font-bold text-sm text-gray-900 dark:text-white uppercase tracking-wider mb-4">
+            <h4 className="font-bold text-sm text-yellow-300 uppercase tracking-wider mb-4">
               {t("support")}
             </h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary-600 transition-colors">
+                <Link
+                  href="/contact"
+                  className="text-sm text-muted-foreground hover:text-yellow-300 transition-colors"
+                >
                   {t("contact")}
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary-600 transition-colors">
+                <Link
+                  href="/privacy"
+                  className="text-sm text-muted-foreground hover:text-yellow-300 transition-colors"
+                >
                   {t("privacy")}
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary-600 transition-colors">
+                <Link
+                  href="/terms"
+                  className="text-sm text-muted-foreground hover:text-yellow-300 transition-colors"
+                >
                   {t("terms")}
                 </Link>
               </li>
@@ -70,18 +91,21 @@ export default async function Footer() {
 
           {/* ABOUT */}
           <div>
-            <h4 className="font-bold text-sm text-gray-900 dark:text-white uppercase tracking-wider mb-4">
+            <h4 className="font-bold text-sm text-yellow-300 uppercase tracking-wider mb-4">
               {t("company")}
             </h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/about" className="text-sm text-muted-foreground hover:text-primary-600 transition-colors">
+                <Link
+                  href="/about"
+                  className="text-sm text-muted-foreground hover:text-yellow-300 transition-colors"
+                >
                   {t("about")}
                 </Link>
               </li>
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2 text-sm text-yellow-500">
                 <Mail className="w-3.5 h-3.5 shrink-0" />
-                <span>support@tamkin.org</span>
+                <Link href="mailto:[EMAIL_ADDRESS]">[EMAIL_ADDRESS]</Link>
               </li>
             </ul>
           </div>
@@ -95,11 +119,17 @@ export default async function Footer() {
             &copy; {new Date().getFullYear()} Tamkin. {t("rights")}
           </p>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <Link href="/privacy" className="hover:text-primary-600 transition-colors">
+            <Link
+              href="/privacy"
+              className="hover:text-yellow-300 transition-colors"
+            >
               {t("privacy")}
             </Link>
-            <span className="text-gray-200 dark:text-gray-700">/</span>
-            <Link href="/terms" className="hover:text-primary-600 transition-colors">
+            <span className="text-yellow-300">|</span>
+            <Link
+              href="/terms"
+              className="hover:text-yellow-300 transition-colors"
+            >
               {t("terms")}
             </Link>
           </div>
