@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, Res, UseGuards, UsePipes } from '@nestjs/common';
+import { Body, Controller, Post, Req, Res, UseGuards, UsePipes } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { GoogleLoginDto, LoginDto, RegisterDto } from './Dto/register.dto';
 import { ValidationPipe } from '@nestjs/common';
@@ -6,7 +6,8 @@ import type { Request, Response } from 'express';
 import { ResponseService } from 'src/Common/Services/Response/response.service';
 import type { IRequest } from 'src/Common/Types/request.types';
 import { ConfirmEmailDto } from './Dto/confirm.email.dto';
-import { AuthenticationGuard } from 'src/Common/Guards/authentication/authentication.guard';
+import { AuthenticationGuard } from 'src/Common/Guards/Authentication/authentication.guard';
+import { CsrfService } from 'src/Common/Services/Security/Csrf/csrf.service';
 
 @UsePipes(
   new ValidationPipe({
@@ -20,6 +21,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly responseService: ResponseService,
+    private readonly csrfService: CsrfService,
   ) {}
 
   @Post('google')
@@ -30,6 +32,9 @@ export class AuthController {
   ) {
     const { user, status } = await this.authService.loginWithGoogle(req, res, body);
 
+    // Rotate CSRF token after successful login
+    const csrfToken = this.csrfService.rotateToken(req , res);
+
     return this.responseService.success({
       message:
         status === 'register'
@@ -38,6 +43,7 @@ export class AuthController {
       info: 'auth.success.credentials_saved_in_cookies_successfully',
       data: {
         user,
+        csrf_token: csrfToken,
         status,
       },
     });
@@ -68,11 +74,14 @@ export class AuthController {
   ) {
     const { user } = await this.authService.login(req, res, body);
 
+    const csrfToken = this.csrfService.rotateToken(req , res);
+
     return this.responseService.success({
       message: 'auth.success.logged_successfully',
       info: 'auth.success.credentials_saved_in_cookies_successfully',
       data: {
         user,
+        csrf_token: csrfToken,
       },
     });
   }
@@ -81,8 +90,13 @@ export class AuthController {
   async logout(@Req() req: IRequest, @Res({ passthrough: true }) res: Response) {
     await this.authService.logout(req as unknown as Request, res);
 
+    const csrfToken = this.csrfService.rotateToken(req as unknown as Request, res);
+
     return this.responseService.success({
       message: 'auth.success.logged_out_successfully',
+      data: {
+        csrf_token: csrfToken,
+      },
     });
   }
 
