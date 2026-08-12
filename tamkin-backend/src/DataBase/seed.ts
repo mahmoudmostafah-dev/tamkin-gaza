@@ -1,16 +1,16 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from '../app.module';
-import { DataSource } from 'typeorm';
-import { HashingService } from '../Common/Services/Security/Hash/hash.service';
-import { UserModel } from './Models/user.model';
-import { ReelModel } from './Models/reel.model';
-import { PaymentModel } from './Payment/payment.model';
-import { UserRoleEnum, UserProviderEnum } from '../Common/Enums/User/user.enum';
-import { CampaignStatusEnum } from '../Modules/Campaign/Enums/campaign-status.enum';
-import { PaymentStatusEnum } from '../Modules/Payment/Enums/payment-status.enum';
-import { PaymentProviderEnum } from '../Modules/Payment/Enums/payment-provider.enum';
 import { faker } from '@faker-js/faker';
+import { NestFactory } from '@nestjs/core';
+import { DataSource } from 'typeorm';
+import { AppModule } from '../app.module';
+import { UserProviderEnum, UserRoleEnum } from '../Common/Enums/User/user.enum';
+import { HashingService } from '../Common/Services/Security/Hash/hash.service';
+import { CampaignStatusEnum } from '../Modules/Campaign/Enums/campaign-status.enum';
+import { PaymentProviderEnum } from '../Modules/Payment/Enums/payment-provider.enum';
+import { PaymentStatusEnum } from '../Modules/Payment/Enums/payment-status.enum';
 import { CampaignModel } from './Models/campaign.model';
+import { ReelModel } from './Models/reel.model';
+import { UserModel } from './Models/user.model';
+import { PaymentModel } from './Payment/payment.model';
 
 export async function ensureAdmin(dataSource: DataSource, hashingService: HashingService) {
   const userRepository = dataSource.getRepository(UserModel);
@@ -172,11 +172,17 @@ export async function seed() {
 // If this file is executed directly (via `ts-node src/DataBase/seed.ts`),
 // set a flag so that when we create an application context with AppModule
 // the module's bootstrap won't re-run the seeder and cause recursion.
-declare const require: any;
-if (typeof require !== 'undefined' && require.main === module) {
-  process.env.SKIP_SEED = '1';
-  seed().catch((err) => {
-    console.error('❌ Seeding failed:', err);
-    process.exit(1);
-  });
+// Only run in development or when explicitly called as a script
+if (process.env.NODE_ENV !== 'production' && typeof require !== 'undefined') {
+  try {
+    if (require.main === module) {
+      process.env.SKIP_SEED = '1';
+      seed().catch((err) => {
+        console.error('❌ Seeding failed:', err);
+        process.exit(1);
+      });
+    }
+  } catch {
+    // Ignore in production builds where require.main might not be available
+  }
 }
