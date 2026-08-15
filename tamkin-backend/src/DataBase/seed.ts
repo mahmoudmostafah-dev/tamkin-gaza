@@ -7,7 +7,6 @@ import { HashingService } from '../Common/Services/Security/Hash/hash.service';
 import { CampaignStatusEnum } from '../Modules/Campaign/Enums/campaign-status.enum';
 import { PaymentProviderEnum } from '../Modules/Payment/Enums/payment-provider.enum';
 import { PaymentStatusEnum } from '../Modules/Payment/Enums/payment-status.enum';
-import { ensureAdmin } from './ensure-admin';
 import { CampaignModel } from './Models/campaign.model';
 import { ReelModel } from './Models/reel.model';
 import { UserModel } from './Models/user.model';
@@ -29,7 +28,8 @@ export async function seed() {
   console.log('🌱 Starting database seeding...');
 
   // 1. Ensure admin exists
-  await ensureAdmin(dataSource, hashingService);
+  const { ensureAdmin: ensureAdminFunc } = await import('./ensure-admin');
+  await ensureAdminFunc(dataSource, hashingService);
 
   // 2. Seed Users
   console.log('Creating regular users...');
