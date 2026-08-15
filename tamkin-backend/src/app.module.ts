@@ -1,32 +1,30 @@
 import { MiddlewareConsumer, Module, OnApplicationBootstrap, RequestMethod } from '@nestjs/common';
-import { join } from 'path';
-import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import {
+  AcceptLanguageResolver,
+  HeaderResolver,
+  I18nJsonLoader,
+  I18nModule,
+  QueryResolver,
+} from 'nestjs-i18n';
+import { join } from 'path';
+import { DataSource } from 'typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { DataSource } from 'typeorm';
-import { HashingService } from './Common/Services/Security/Hash/hash.service';
-import { AuthModule } from './Modules/Auth/auth.module';
 import { CommonModule } from './Common/common.module';
 import { CsrfMiddleware } from './Common/Middleware/csrf.middleware';
-import { TypeORMConfig } from './Config/typeorm.config';
-import { CampaignModule } from './Modules/Campaign/campaign.module';
-import { LanguageMiddleware } from './Middlewares/language.middleware';
-import { APP_PIPE, APP_GUARD } from '@nestjs/core';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { CustomValidationPipe } from './Common/Pipes/custom.validation.pipe';
 import { MinioModule } from './Common/Minio/minio.module';
-import { ReelsModule } from './Modules/Reels/reels.module';
-import {
-  I18nModule,
-  I18nJsonLoader,
-  AcceptLanguageResolver,
-  QueryResolver,
-  HeaderResolver,
-} from 'nestjs-i18n';
+import { CustomValidationPipe } from './Common/Pipes/custom.validation.pipe';
+import { HashingService } from './Common/Services/Security/Hash/hash.service';
+import { TypeORMConfig } from './Config/typeorm.config';
+import { AuthModule } from './Modules/Auth/auth.module';
+import { CampaignModule } from './Modules/Campaign/campaign.module';
 import { PaymentModule } from './Modules/Payment/payment.module';
-import { seed, ensureAdmin } from './DataBase/seed';
+import { ReelsModule } from './Modules/Reels/reels.module';
 
 @Module({
   imports: [
@@ -106,6 +104,8 @@ export class AppModule implements OnApplicationBootstrap {
     }
     if (!process.env.SKIP_SEED) {
       try {
+        // Lazy load to avoid circular dependency in production builds
+        const { ensureAdmin } = await import('./DataBase/seed');
         await ensureAdmin(this.dataSource, this.hashingService);
       } catch (err) {
         console.error('Failed to ensure admin on bootstrap:', err);
