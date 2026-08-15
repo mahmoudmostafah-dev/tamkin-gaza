@@ -25,20 +25,20 @@ docker run --rm \
     --webroot \
     --webroot-path=/var/www/certbot
 
-# 2. Copy renewed certificates
+# 2. Copy renewed certificates (using -L to follow symlinks)
 echo -e "${YELLOW}📋 Copying renewed certificates...${NC}"
 
 # Production
 if [ -f "$CERTBOT_DIR/conf/live/tamkeengaza.org/fullchain.pem" ]; then
-    sudo cp "$CERTBOT_DIR/conf/live/tamkeengaza.org/fullchain.pem" "$SSL_DIR/tamkeengaza.org.crt"
-    sudo cp "$CERTBOT_DIR/conf/live/tamkeengaza.org/privkey.pem" "$SSL_DIR/tamkeengaza.org.key"
+    sudo cp -L "$CERTBOT_DIR/conf/live/tamkeengaza.org/fullchain.pem" "$SSL_DIR/tamkeengaza.org.crt"
+    sudo cp -L "$CERTBOT_DIR/conf/live/tamkeengaza.org/privkey.pem" "$SSL_DIR/tamkeengaza.org.key"
     echo -e "${GREEN}✅ Production certificates updated${NC}"
 fi
 
 # Test
 if [ -f "$CERTBOT_DIR/conf/live/test.tamkeengaza.org/fullchain.pem" ]; then
-    sudo cp "$CERTBOT_DIR/conf/live/test.tamkeengaza.org/fullchain.pem" "$SSL_DIR/test.tamkeengaza.org.crt"
-    sudo cp "$CERTBOT_DIR/conf/live/test.tamkeengaza.org/privkey.pem" "$SSL_DIR/test.tamkeengaza.org.key"
+    sudo cp -L "$CERTBOT_DIR/conf/live/test.tamkeengaza.org/fullchain.pem" "$SSL_DIR/test.tamkeengaza.org.crt"
+    sudo cp -L "$CERTBOT_DIR/conf/live/test.tamkeengaza.org/privkey.pem" "$SSL_DIR/test.tamkeengaza.org.key"
     echo -e "${GREEN}✅ Test certificates updated${NC}"
 fi
 
