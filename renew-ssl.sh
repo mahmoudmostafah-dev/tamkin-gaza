@@ -16,12 +16,14 @@ CERTBOT_DIR="$PROJECT_DIR/certbot"
 
 cd "$PROJECT_DIR" || exit 1
 
-# 1. Renew certificates using Docker
+# 1. Renew certificates using Docker with webroot mode
 echo -e "${YELLOW}🔐 Renewing certificates...${NC}"
 docker run --rm \
     -v "$CERTBOT_DIR/conf:/etc/letsencrypt" \
     -v "$CERTBOT_DIR/www:/var/www/certbot" \
-    certbot/certbot renew
+    certbot/certbot renew \
+    --webroot \
+    --webroot-path=/var/www/certbot
 
 # 2. Copy renewed certificates
 echo -e "${YELLOW}📋 Copying renewed certificates...${NC}"
