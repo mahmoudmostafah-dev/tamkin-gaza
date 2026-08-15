@@ -104,8 +104,7 @@ export class AppModule implements OnApplicationBootstrap {
     }
     if (!process.env.SKIP_SEED) {
       try {
-        // Lazy load to avoid circular dependency in production builds
-        const { ensureAdmin } = await import('./DataBase/seed');
+        const { ensureAdmin } = await import('./DataBase/ensure-admin');
         await ensureAdmin(this.dataSource, this.hashingService);
       } catch (err) {
         console.error('Failed to ensure admin on bootstrap:', err);

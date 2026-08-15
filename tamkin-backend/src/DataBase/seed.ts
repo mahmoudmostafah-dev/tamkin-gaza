@@ -7,32 +7,11 @@ import { HashingService } from '../Common/Services/Security/Hash/hash.service';
 import { CampaignStatusEnum } from '../Modules/Campaign/Enums/campaign-status.enum';
 import { PaymentProviderEnum } from '../Modules/Payment/Enums/payment-provider.enum';
 import { PaymentStatusEnum } from '../Modules/Payment/Enums/payment-status.enum';
+import { ensureAdmin } from './ensure-admin';
 import { CampaignModel } from './Models/campaign.model';
 import { ReelModel } from './Models/reel.model';
 import { UserModel } from './Models/user.model';
 import { PaymentModel } from './Payment/payment.model';
-
-export async function ensureAdmin(dataSource: DataSource, hashingService: HashingService) {
-  const userRepository = dataSource.getRepository(UserModel);
-  const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@tamkin.com';
-  let admin = await userRepository.findOne({ where: { email: adminEmail } });
-  if (!admin) {
-    console.log('Creating Admin User...');
-    const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'AdminPassword123!';
-    admin = userRepository.create({
-      firstName: 'Super',
-      lastName: 'Admin',
-      email: adminEmail,
-      emailVerified: true,
-      provider: UserProviderEnum.SYSTEM,
-      password: await hashingService.generateHash({ text: adminPassword }),
-      role: UserRoleEnum.SUPER_ADMIN,
-    });
-    await userRepository.save(admin);
-  } else {
-    console.log('Admin User already exists. Skipping...');
-  }
-}
 
 export async function seed() {
   const app = await NestFactory.createApplicationContext(AppModule);
