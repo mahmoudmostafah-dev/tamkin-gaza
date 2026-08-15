@@ -13,6 +13,9 @@ import { ReelModel } from './Models/reel.model';
 import { UserModel } from './Models/user.model';
 import { PaymentModel } from './Payment/payment.model';
 
+// Re-export ensureAdmin for CLI usage
+export { ensureAdmin } from './ensure-admin';
+
 export async function seed() {
   const app = await NestFactory.createApplicationContext(AppModule);
   const dataSource = app.get(DataSource);
