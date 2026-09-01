@@ -4,6 +4,8 @@ services:
   # ============================================
   postgres-test:
     image: postgres:16-alpine
+    ports:
+      - "5433:5432" # Test on port 5433 to avoid conflicts
     environment:
       POSTGRES_USER: ${POSTGRES_TEST_USER}
       POSTGRES_PASSWORD: ${POSTGRES_TEST_PASSWORD}
@@ -83,6 +85,8 @@ services:
   # ============================================
   postgres-prod:
     image: postgres:16-alpine
+    ports:
+      - "5432:5432" # Production on standard port
     environment:
       POSTGRES_USER: ${POSTGRES_PROD_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PROD_PASSWORD}
